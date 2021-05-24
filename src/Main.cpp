@@ -1,7 +1,9 @@
 #include <iostream>
 #include <stdio.h>
 
-int main(int argc, char** argv){
-    puts("hello");
-    return 0;
+#include "App.h"
+
+int main(int argc, const char** argv){
+    Stakken game = Stakken(argc,argv);
+    return game.OnExecute();
 }
