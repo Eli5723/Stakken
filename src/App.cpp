@@ -2,10 +2,13 @@
 
 #include <GL/gl3w.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "./Systems/Input/KeyboardMapper.h"
 #include "./Systems/Input/InputBuffer.h"
 #include "./Systems/Input/InputProfile.h"
+
+#include "./Systems/Assets/Sound.h"
 
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
@@ -13,6 +16,34 @@ const int WINDOW_HEIGHT = 480;
 int x = 0;
 Stakken::Stakken(int argc, const char** argv){
     Running = true;
+}
+
+bool Stakken::OnInit(){
+    if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+        return false;
+    }
+
+    // Initialize Graphics
+    gl3wInit();
+
+    window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    SDL_GL_CreateContext(window);
+
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    SDL_GL_SwapWindow(window);
+
+    if(Surf_Display ==  NULL) {
+        return false;
+    }
+
+    // Initialize Audio
+    if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,4,2048) < 0){
+        SDL_Log("Failed to load audio.");
+    }
+
+    return true;
 }
 
 int Stakken::OnExecute(){
@@ -51,7 +82,9 @@ int Stakken::OnExecute(){
                 }
 
                 case SDL_KEYDOWN:
-
+                    switch (event.key.keysym.scancode){
+                        case SDL_SCANCODE_A: testSound->play();
+                    }
                 break;
 
            }
@@ -62,28 +95,6 @@ int Stakken::OnExecute(){
     }
 
     return 0;
-}
-
-bool Stakken::OnInit(){
-    if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        return false;
-    }
-
-    gl3wInit();
-
-    window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    SDL_GL_CreateContext(window);
-
-    glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    SDL_GL_SwapWindow(window);
-
-    if(Surf_Display ==  NULL) {
-        return false;
-    }
-
-    return true;
 }
 
 void Stakken::OnEvent(SDL_Event* Event){
