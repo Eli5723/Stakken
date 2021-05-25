@@ -7,8 +7,6 @@
 
 #include <SDL2/SDL.h>
 
-#include "./TetrisInput.h"
-
 namespace fs = std::filesystem;
 
 struct InputProfile {
@@ -38,21 +36,21 @@ struct InputProfile {
     InputProfile(){
         name = "Default";
     
-        das = 5;
-        arr = 5;
-        dropArr = 5;
+        das = 1000;
+        arr = 500;
+        dropArr = 200;
 
         // Piece Movement settings
-        left = SDLK_a;
-        right = SDLK_d;
+        left = SDL_SCANCODE_A;
+        right = SDL_SCANCODE_D;
         
-        softDrop = SDLK_KP_5;
-        hardDrop = SDLK_SPACE;
-        sonicDrop = SDLK_LSHIFT;
+        softDrop = SDL_SCANCODE_KP_5;
+        hardDrop = SDL_SCANCODE_SPACE;
+        sonicDrop = SDL_SCANCODE_LSHIFT;
         
-        rcw = SDLK_KP_4;
-        rccw = SDLK_KP_6;
-        flip = SDLK_KP_8;
+        rcw = SDL_SCANCODE_KP_4;
+        rccw = SDL_SCANCODE_KP_6;
+        flip = SDL_SCANCODE_KP_8;
     }
     // Load existing profile from file
     InputProfile(const std::string& name){
@@ -69,7 +67,7 @@ struct InputProfile {
         std::string keyname;
         for (int i=0; i<8; i++) {
             std::getline(input,keyname);
-            keys[i] = SDL_GetKeyFromName(keyname.c_str());
+            keys[i] = SDL_GetScancodeFromName(keyname.c_str());
         }
 
     }

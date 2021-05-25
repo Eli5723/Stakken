@@ -1,0 +1,3 @@
+/home/eli/Stakken/CMakeFiles/rebuild_cache.dir
+/home/eli/Stakken/CMakeFiles/edit_cache.dir
+/home/eli/Stakken/CMakeFiles/Stakken.dir

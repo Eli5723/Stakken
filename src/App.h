@@ -14,7 +14,7 @@ class Stakken {
         
         bool OnInit();
         void OnEvent(SDL_Event* Event);
-        void OnLoop();
+        void OnLoop(int dt);
         void OnRender();
         void OnCleanup();
 

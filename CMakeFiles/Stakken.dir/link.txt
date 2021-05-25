@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -std=c++17 CMakeFiles/Stakken.dir/src/App.cpp.o CMakeFiles/Stakken.dir/src/Main.cpp.o -o Stakken  -lSDL2main -lSDL2 

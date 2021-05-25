@@ -1,25 +1,37 @@
 #include "App.h"
 
-#include <SDL2/SDL_opengl.h>
+#include <GL/gl3w.h>
+#include <SDL2/SDL.h>
 
-#include "./Systems/InputProfile.h"
+#include "./Systems/Input/KeyboardMapper.h"
+#include "./Systems/Input/InputBuffer.h"
+#include "./Systems/Input/InputProfile.h"
 
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 
-
+int x = 0;
 Stakken::Stakken(int argc, const char** argv){
     Running = true;
 }
 
 int Stakken::OnExecute(){
-
     if (OnInit() == false)
         return -1;
 
     SDL_Event event;
 
-    while (Running){
+    InputProfile testProfile;
+    KeyboardMapper testMapper(testProfile);
+
+    int frameBegin = SDL_GetTicks();
+    int frameDelta = 0;
+
+    while (Running) {
+        int newTime = SDL_GetTicks();
+        frameDelta = newTime - frameBegin; 
+        frameBegin = newTime;
+
         while(SDL_PollEvent(&event)){
            OnEvent(&event);
 
@@ -39,28 +51,15 @@ int Stakken::OnExecute(){
                 }
 
                 case SDL_KEYDOWN:
-                switch(event.key.keysym.scancode){
-                    case SDL_SCANCODE_UP:
-                    break;
-                    case SDL_SCANCODE_DOWN:
-                    break;
-                    case SDL_SCANCODE_RIGHT:
-                    break;
-                    case SDL_SCANCODE_LEFT:
-                    break;
-                    default:
-                    break;
-                }
+
                 break;
 
            }
         }
 
-        OnLoop();
+        OnLoop(frameDelta);
         OnRender();
-        SDL_Delay(16);
     }
-
 
     return 0;
 }
@@ -70,31 +69,39 @@ bool Stakken::OnInit(){
         return false;
     }
 
-    window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    Surf_Display = SDL_GetWindowSurface(window);
+    gl3wInit();
 
-    SDL_FillRect(Surf_Display, NULL, SDL_MapRGB(Surf_Display->format,0xFF,0xFF,0xFF));
-    SDL_UpdateWindowSurface(window);
+    window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    SDL_GL_CreateContext(window);
+
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    SDL_GL_SwapWindow(window);
 
     if(Surf_Display ==  NULL) {
         return false;
     }
+
     return true;
 }
 
 void Stakken::OnEvent(SDL_Event* Event){
     
 
-
 }
 
-void Stakken::OnLoop(){
-
+void Stakken::OnLoop(int dt){
+    
 }
 
 void Stakken::OnRender(){
-    SDL_FillRect(Surf_Display, NULL, SDL_MapRGB(Surf_Display->format,0xFF,0xFF,0xFF));
-    SDL_UpdateWindowSurface(window);
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    
+
+    SDL_GL_SwapWindow(window);
 }
 
 void Stakken::OnCleanup(){
