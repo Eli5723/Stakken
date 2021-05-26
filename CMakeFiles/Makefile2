@@ -81,12 +81,12 @@ clean: CMakeFiles/Stakken.dir/clean
 CMakeFiles/Stakken.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Stakken.dir/build.make CMakeFiles/Stakken.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Stakken.dir/build.make CMakeFiles/Stakken.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=1,2,3 "Built target Stakken"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Built target Stakken"
 .PHONY : CMakeFiles/Stakken.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/Stakken.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/eli/Stakken/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/eli/Stakken/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/Stakken.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/eli/Stakken/CMakeFiles 0
 .PHONY : CMakeFiles/Stakken.dir/rule

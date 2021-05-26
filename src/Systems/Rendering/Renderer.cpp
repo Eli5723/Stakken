@@ -12,9 +12,10 @@ static const char* vertexShader = R"(
 	layout (location = 1) in vec4 a_Color;
 	layout (location = 2) in vec2 a_TexCoord;
 	layout (location = 3) in float a_TexIndex;
+	layout (location = 4) in uint a_view;
 
-	uniform mat4 u_projection;
-	uniform mat4 u_transform;
+	uniform mat4 u_projection[4];
+	uniform mat4 u_transform[4];
 
 	out vec4 v_Color;
 	out vec2 v_TexCoord;
@@ -22,7 +23,7 @@ static const char* vertexShader = R"(
 
 	void main()
 	{
-		gl_Position = u_projection * u_transform * vec4(a_Pos, 1.0);
+		gl_Position = u_projection[0] * u_transform[0] * vec4(a_Pos, 1.0);
 		v_Color = a_Color;
 		v_TexCoord = a_TexCoord;
 		v_TexIndex = a_TexIndex;
@@ -63,10 +64,13 @@ struct Vertex {
 	glm::vec4 color;
 	glm::vec2 texCoords;
 	GLfloat texIndex;
+	GLuint view;
 };
 
 struct RendererData {
 	Shader* quadShader;
+	GLuint currentView = 0;
+
 
 	GLuint QuadVA = 0;
 	GLuint QuadVB = 0;
@@ -85,8 +89,12 @@ struct RendererData {
 
 static RendererData s_Data;
 
-void Renderer::Init() {
+// Driver Methods
+void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	s_Data.quadShader = new Shader(fragmentShader,vertexShader);
+	s_Data.quadShader->use();
+	s_Data.quadShader->setMat4("u_projection",viewProjection);
+	s_Data.quadShader->setMat4("u_transform",viewTransform);
 
 	s_Data.QuadBuffer = new Vertex[MaxVertexCount];
 	
@@ -108,6 +116,9 @@ void Renderer::Init() {
 	
 	glEnableVertexAttribArray(3); 
 	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texIndex));
+
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, view));
 	
 	uint32_t indices[MaxIndexCount];
 
@@ -179,6 +190,7 @@ void Renderer::Flush() {
 	s_Data.TextureSlotIndex = 1;
 }
 
+// Queue Methods
 void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color) {
 	Vertex* currentVertex = s_Data.QuadBufferPtr;
 
@@ -193,24 +205,28 @@ void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const 
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 0.0f,0.0f };
 	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x + size.x, position.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 1.0f,0.0f };
 	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x + size.x, position.y + size.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 1.0f,1.0f };
 	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x, position.y + size.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 0.0f,1.0f };
 	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.IndexCount += 6;

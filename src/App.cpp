@@ -1,6 +1,7 @@
 #include "App.h"
 
 #include <GL/gl3w.h>
+#include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
@@ -9,11 +10,21 @@
 #include "./Systems/Input/InputProfile.h"
 
 #include "./Systems/Assets/Sound.h"
+#include "./Systems/Assets/Texture.h"
+#include "./Systems/Assets/BGShader.h"
+
+#include "./Systems/Rendering/Renderer.h"
+#include "./Systems/Rendering/ScreenQuad.h"
 
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 
-int x = 0;
+BGShader* testShader;
+float testRes[2]{640.0f,480.0f};
+
+glm::vec2 box{0,0};
+glm::vec2 boxVel{100,0};
+
 Stakken::Stakken(int argc, const char** argv){
     Running = true;
 }
@@ -34,9 +45,16 @@ bool Stakken::OnInit(){
 
     SDL_GL_SwapWindow(window);
 
-    if(Surf_Display ==  NULL) {
-        return false;
-    }
+    glm::mat4 testProjection = glm::ortho(0.0f,(float)WINDOW_WIDTH,(float)WINDOW_HEIGHT,0.0f,-1.0f,1.0f);
+    glm::mat4 testTransform = glm::mat4(1);
+    
+    Renderer::Init(testProjection,testTransform);
+
+    // Initialize Asset Systems
+    BGShader::Init();
+    ScreenQuad::Init();
+
+    testShader = new BGShader("./BGShaders/Ocean.frag");
 
     // Initialize Audio
     if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,4,2048) < 0){
@@ -53,6 +71,7 @@ int Stakken::OnExecute(){
     SDL_Event event;
 
     InputProfile testProfile;
+    testProfile.save();
     KeyboardMapper testMapper(testProfile);
 
     int frameBegin = SDL_GetTicks();
@@ -73,10 +92,13 @@ int Stakken::OnExecute(){
                 case SDL_WINDOWEVENT: {
                     switch (event.window.event){
                         case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        SDL_Log("Window %d moved to %d %d", event.window.windowID, event.window.data1, event.window.data2);
+                        SDL_Log("Window %d resized to to %dx%d", event.window.windowID, event.window.data1, event.window.data2);
+                        testRes[0] = event.window.data1;
+                        testRes[1] = event.window.data2;
+                        glViewport(0,0,event.window.data1,event.window.data2);
                         break;
                         case SDL_WINDOWEVENT_MOVED:
-                        SDL_Log("Window %d moved to %d %d", event.window.windowID, event.window.data1, event.window.data2);
+                        SDL_Log("Window %d moved to %d,%d", event.window.windowID, event.window.data1, event.window.data2);
                         break;
                     }
                 }
@@ -106,14 +128,28 @@ void Stakken::OnEvent(SDL_Event* Event){
 }
 
 void Stakken::OnLoop(int dt){
-    
+    float delta = ((float)dt / 1000.0f);
+    boxVel.y += 30.0f*delta;
+
+    box += boxVel *delta;
 }
 
 void Stakken::OnRender(){
+    float fTime = (float)SDL_GetTicks()/1000.0f; 
+
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    
+    // Draw Background
+    testShader->draw(testRes,fTime);
+
+    // Draw Gameplay
+    Renderer::BeginBatch();
+
+    Renderer::DrawQuad(box,glm::vec2{20,20},glm::vec4{1,1,1,1});
+
+    Renderer::EndBatch();
+    Renderer::Flush();
 
     SDL_GL_SwapWindow(window);
 }

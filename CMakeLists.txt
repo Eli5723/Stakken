@@ -10,7 +10,7 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 
 file (GLOB_RECURSE source_files "${source_dir}/*.cpp")
 
-add_executable (Stakken "${source_dir}/Systems/gl3w.c" ${source_files})
+add_executable (Stakken "${source_dir}/Systems/Rendering/gl3w.c" ${source_files})
 
 find_package(glm REQUIRED)
 target_link_libraries(Stakken SDL2main SDL2 SDL2_mixer glm)

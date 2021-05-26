@@ -10,6 +10,10 @@
 namespace fs = std::filesystem;
 
 struct InputProfile {
+
+    const std::string kProfileDirectory = "./Profiles/";
+    const std::string kFileExtension = ".pro";
+    
     std::string name;
     
     // Repeat settings
@@ -56,7 +60,7 @@ struct InputProfile {
     InputProfile(const std::string& name){
         this->name = name;
         
-        std::string path = "./profiles/" + name + ".pro";
+        std::string path = kProfileDirectory + name + kFileExtension;
 
         std::ifstream input(path);
         input >> das;
@@ -73,7 +77,7 @@ struct InputProfile {
     }
 
     void save() {
-        std::string path = "./profiles/" + name + ".pro";
+        std::string path = kProfileDirectory + name + kFileExtension;
         std::ofstream out(path, std::ios::trunc | std::ios::out);
         write(out);
         SDL_Log("Wrote %s to %s",name.c_str(), path.c_str()); 

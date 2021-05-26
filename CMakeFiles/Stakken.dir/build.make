@@ -69,10 +69,24 @@ include CMakeFiles/Stakken.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/Stakken.dir/flags.make
 
+CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o: CMakeFiles/Stakken.dir/flags.make
+CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o: src/Systems/Rendering/gl3w.c
+CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o: CMakeFiles/Stakken.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o -MF CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o.d -o CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o -c /home/eli/Stakken/src/Systems/Rendering/gl3w.c
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/eli/Stakken/src/Systems/Rendering/gl3w.c > CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.i
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/eli/Stakken/src/Systems/Rendering/gl3w.c -o CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.s
+
 CMakeFiles/Stakken.dir/src/App.cpp.o: CMakeFiles/Stakken.dir/flags.make
 CMakeFiles/Stakken.dir/src/App.cpp.o: src/App.cpp
 CMakeFiles/Stakken.dir/src/App.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/Stakken.dir/src/App.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Stakken.dir/src/App.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/App.cpp.o -MF CMakeFiles/Stakken.dir/src/App.cpp.o.d -o CMakeFiles/Stakken.dir/src/App.cpp.o -c /home/eli/Stakken/src/App.cpp
 
 CMakeFiles/Stakken.dir/src/App.cpp.i: cmake_force
@@ -86,7 +100,7 @@ CMakeFiles/Stakken.dir/src/App.cpp.s: cmake_force
 CMakeFiles/Stakken.dir/src/Main.cpp.o: CMakeFiles/Stakken.dir/flags.make
 CMakeFiles/Stakken.dir/src/Main.cpp.o: src/Main.cpp
 CMakeFiles/Stakken.dir/src/Main.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/Stakken.dir/src/Main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/Stakken.dir/src/Main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Main.cpp.o -MF CMakeFiles/Stakken.dir/src/Main.cpp.o.d -o CMakeFiles/Stakken.dir/src/Main.cpp.o -c /home/eli/Stakken/src/Main.cpp
 
 CMakeFiles/Stakken.dir/src/Main.cpp.i: cmake_force
@@ -97,23 +111,105 @@ CMakeFiles/Stakken.dir/src/Main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Stakken.dir/src/Main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/eli/Stakken/src/Main.cpp -o CMakeFiles/Stakken.dir/src/Main.cpp.s
 
+CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o: CMakeFiles/Stakken.dir/flags.make
+CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o: src/Systems/Assets/Sound.cpp
+CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o -MF CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o.d -o CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o -c /home/eli/Stakken/src/Systems/Assets/Sound.cpp
+
+CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/eli/Stakken/src/Systems/Assets/Sound.cpp > CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.i
+
+CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/eli/Stakken/src/Systems/Assets/Sound.cpp -o CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.s
+
+CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o: CMakeFiles/Stakken.dir/flags.make
+CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o: src/Systems/Assets/Texture.cpp
+CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o -MF CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o.d -o CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o -c /home/eli/Stakken/src/Systems/Assets/Texture.cpp
+
+CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/eli/Stakken/src/Systems/Assets/Texture.cpp > CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.i
+
+CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/eli/Stakken/src/Systems/Assets/Texture.cpp -o CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.s
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o: CMakeFiles/Stakken.dir/flags.make
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o: src/Systems/Rendering/Renderer.cpp
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o -MF CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o.d -o CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o -c /home/eli/Stakken/src/Systems/Rendering/Renderer.cpp
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/eli/Stakken/src/Systems/Rendering/Renderer.cpp > CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.i
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/eli/Stakken/src/Systems/Rendering/Renderer.cpp -o CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.s
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o: CMakeFiles/Stakken.dir/flags.make
+CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o: src/Systems/Rendering/ScreenQuad.cpp
+CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o -MF CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o.d -o CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o -c /home/eli/Stakken/src/Systems/Rendering/ScreenQuad.cpp
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/eli/Stakken/src/Systems/Rendering/ScreenQuad.cpp > CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.i
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/eli/Stakken/src/Systems/Rendering/ScreenQuad.cpp -o CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.s
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o: CMakeFiles/Stakken.dir/flags.make
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o: src/Systems/Rendering/Shader.cpp
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o: CMakeFiles/Stakken.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o -MF CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o.d -o CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o -c /home/eli/Stakken/src/Systems/Rendering/Shader.cpp
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/eli/Stakken/src/Systems/Rendering/Shader.cpp > CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.i
+
+CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/eli/Stakken/src/Systems/Rendering/Shader.cpp -o CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.s
+
 # Object files for target Stakken
 Stakken_OBJECTS = \
+"CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o" \
 "CMakeFiles/Stakken.dir/src/App.cpp.o" \
-"CMakeFiles/Stakken.dir/src/Main.cpp.o"
+"CMakeFiles/Stakken.dir/src/Main.cpp.o" \
+"CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o" \
+"CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o" \
+"CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o" \
+"CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o" \
+"CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o"
 
 # External object files for target Stakken
 Stakken_EXTERNAL_OBJECTS =
 
-Stakken: CMakeFiles/Stakken.dir/src/App.cpp.o
-Stakken: CMakeFiles/Stakken.dir/src/Main.cpp.o
-Stakken: CMakeFiles/Stakken.dir/build.make
-Stakken: CMakeFiles/Stakken.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable Stakken"
+release/Stakken: CMakeFiles/Stakken.dir/src/Systems/Rendering/gl3w.c.o
+release/Stakken: CMakeFiles/Stakken.dir/src/App.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/src/Main.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/src/Systems/Assets/Sound.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/src/Systems/Assets/Texture.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/src/Systems/Rendering/Renderer.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/src/Systems/Rendering/ScreenQuad.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/src/Systems/Rendering/Shader.cpp.o
+release/Stakken: CMakeFiles/Stakken.dir/build.make
+release/Stakken: CMakeFiles/Stakken.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/eli/Stakken/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable release/Stakken"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Stakken.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/Stakken.dir/build: Stakken
+CMakeFiles/Stakken.dir/build: release/Stakken
 .PHONY : CMakeFiles/Stakken.dir/build
 
 CMakeFiles/Stakken.dir/clean:
