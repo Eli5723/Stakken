@@ -83,10 +83,13 @@ int Stakken::OnExecute(){
 
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.scancode){
-                        case SDL_SCANCODE_A: testSound->play();
+                        case SDL_SCANCODE_A:
+                        default:
+                        break;
                     }
                 break;
-
+                default:
+                break;
            }
         }
 
