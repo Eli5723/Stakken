@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "./Renderer.h"
 
 #include <GL/gl3w.h>
 #include <array>
@@ -92,9 +92,7 @@ static RendererData s_Data;
 // Driver Methods
 void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	s_Data.quadShader = new Shader(fragmentShader,vertexShader);
-	s_Data.quadShader->use();
-	s_Data.quadShader->setMat4("u_projection",viewProjection);
-	s_Data.quadShader->setMat4("u_transform",viewTransform);
+	SetView(viewProjection,viewTransform);
 
 	s_Data.QuadBuffer = new Vertex[MaxVertexCount];
 	
@@ -153,6 +151,12 @@ void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	for (int i = 1; i < MaxTextures; i++) {
 		s_Data.TextureSlots[i] = s_Data.WhiteTexture;
 	}
+}
+
+void Renderer::SetView(glm::mat4& viewProjection,glm::mat4& viewTransform){
+	s_Data.quadShader->use();
+	s_Data.quadShader->setMat4("u_projection",viewProjection);
+	s_Data.quadShader->setMat4("u_transform",viewTransform);
 }
 
 void Renderer::Shutdown() {

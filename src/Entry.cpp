@@ -1,4 +1,4 @@
-#include "App.h"
+#include "./Entry.h"
 
 #include <GL/gl3w.h>
 #include <glm/glm.hpp>
@@ -20,16 +20,15 @@ const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 
 BGShader* testShader;
-float testRes[2]{640.0f,480.0f};
+float testRes[2]{WINDOW_WIDTH,WINDOW_HEIGHT};
 
-glm::vec2 box{0,0};
-glm::vec2 boxVel{100,0};
+glm::vec2 box{0,64};
+glm::vec2 boxVel{200,0};
 
-Stakken::Stakken(int argc, const char** argv){
-    Running = true;
-}
+bool Running = true;
+SDL_Window* window;
 
-bool Stakken::OnInit(){
+bool OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         return false;
     }
@@ -41,11 +40,8 @@ bool Stakken::OnInit(){
     SDL_GL_CreateContext(window);
 
     glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
 
-    SDL_GL_SwapWindow(window);
-
-    glm::mat4 testProjection = glm::ortho(0.0f,(float)WINDOW_WIDTH,(float)WINDOW_HEIGHT,0.0f,-1.0f,1.0f);
+    glm::mat4 testProjection = glm::ortho(0.0f,testRes[0],testRes[1],0.0f,-1.0f,1.0f);
     glm::mat4 testTransform = glm::mat4(1);
     
     Renderer::Init(testProjection,testTransform);
@@ -64,7 +60,7 @@ bool Stakken::OnInit(){
     return true;
 }
 
-int Stakken::OnExecute(){
+int OnExecute(){
     if (OnInit() == false)
         return -1;
 
@@ -83,36 +79,7 @@ int Stakken::OnExecute(){
         frameBegin = newTime;
 
         while(SDL_PollEvent(&event)){
-           OnEvent(&event);
-
-           switch(event.type){
-                case SDL_QUIT:
-                    Running = false;
-                    break;
-                case SDL_WINDOWEVENT: {
-                    switch (event.window.event){
-                        case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        SDL_Log("Window %d resized to to %dx%d", event.window.windowID, event.window.data1, event.window.data2);
-                        testRes[0] = event.window.data1;
-                        testRes[1] = event.window.data2;
-                        glViewport(0,0,event.window.data1,event.window.data2);
-                        break;
-                        case SDL_WINDOWEVENT_MOVED:
-                        SDL_Log("Window %d moved to %d,%d", event.window.windowID, event.window.data1, event.window.data2);
-                        break;
-                    }
-                }
-
-                case SDL_KEYDOWN:
-                    switch (event.key.keysym.scancode){
-                        case SDL_SCANCODE_A:
-                        default:
-                        break;
-                    }
-                break;
-                default:
-                break;
-           }
+           OnEvent(event);
         }
 
         OnLoop(frameDelta);
@@ -122,19 +89,39 @@ int Stakken::OnExecute(){
     return 0;
 }
 
-void Stakken::OnEvent(SDL_Event* Event){
+void OnEvent(SDL_Event& event){
+    switch(event.type){
     
+    case SDL_QUIT:
+        Running = false;
+        break;
+    
+    case SDL_WINDOWEVENT: {
+        switch (event.window.event){
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+                OnResize(event.window.data1,event.window.data2);
+            break;
+        }
+    }
 
+    case SDL_KEYDOWN:
+        switch (event.key.keysym.scancode){
+
+            default:
+            break;
+        }
+    break;
+
+    default:
+    break;
+    }
 }
 
-void Stakken::OnLoop(int dt){
-    float delta = ((float)dt / 1000.0f);
-    boxVel.y += 30.0f*delta;
-
-    box += boxVel *delta;
+void OnLoop(int dt){
+    // float delta = ((float)dt / 1000.0f);
 }
 
-void Stakken::OnRender(){
+void OnRender(){
     float fTime = (float)SDL_GetTicks()/1000.0f; 
 
     glClearColor(0,0,0,1);
@@ -146,7 +133,11 @@ void Stakken::OnRender(){
     // Draw Gameplay
     Renderer::BeginBatch();
 
-    Renderer::DrawQuad(box,glm::vec2{20,20},glm::vec4{1,1,1,1});
+    Renderer::EndBatch();
+    Renderer::Flush();
+
+    // Draw Other Boards
+    Renderer::BeginBatch();
 
     Renderer::EndBatch();
     Renderer::Flush();
@@ -154,6 +145,16 @@ void Stakken::OnRender(){
     SDL_GL_SwapWindow(window);
 }
 
-void Stakken::OnCleanup(){
+// Window Events
+void OnResize(int width, int height){
+    testRes[0] = width;
+    testRes[1] = height;
+    glViewport(0,0,width,height);
+    glm::mat4 viewProjection = glm::ortho(0.0f,(float)width,(float)height,0.0f,-1.0f,1.0f);
+    glm::mat4 viewTransform = glm::mat4(1);
+    Renderer::SetView(viewProjection,viewTransform);
+}
+
+void OnCleanup(){
     
 }

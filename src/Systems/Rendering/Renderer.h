@@ -9,6 +9,7 @@
 class Renderer {
 public:
 	static void Init(glm::mat4& viewProjection,glm::mat4& viewTransform);
+	static void SetView(glm::mat4& viewProjection,glm::mat4& viewTransform);
 	static void Shutdown();
 
 	static void BeginBatch();
