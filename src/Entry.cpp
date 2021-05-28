@@ -16,17 +16,26 @@
 #include "./Systems/Rendering/Renderer.h"
 #include "./Systems/Rendering/ScreenQuad.h"
 
+#include "./Gameplay/Tile.h"
+#include "./Gameplay/Piece.h"
+#include "./Gameplay/Board.h"
+#include "./Gameplay/RenderGame.h"
+
 const int WINDOW_WIDTH = 640;
 const int WINDOW_HEIGHT = 480;
 
-BGShader* testShader;
-float testRes[2]{WINDOW_WIDTH,WINDOW_HEIGHT};
 
-glm::vec2 box{0,64};
-glm::vec2 boxVel{200,0};
+// Pointers
+BGShader* BackgroundShader;
+
+glm::vec2 Resolution;
 
 bool Running = true;
 SDL_Window* window;
+
+// Test variables
+Piece* testPiece;
+Board* testBoard;
 
 bool OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -41,7 +50,8 @@ bool OnInit(){
 
     glClearColor(0,0,0,1);
 
-    glm::mat4 testProjection = glm::ortho(0.0f,testRes[0],testRes[1],0.0f,-1.0f,1.0f);
+    Resolution = glm::vec2{WINDOW_WIDTH,WINDOW_HEIGHT};
+    glm::mat4 testProjection = glm::ortho(0.0f,Resolution.x,Resolution.y,0.0f,-1.0f,1.0f);
     glm::mat4 testTransform = glm::mat4(1);
     
     Renderer::Init(testProjection,testTransform);
@@ -50,7 +60,7 @@ bool OnInit(){
     BGShader::Init();
     ScreenQuad::Init();
 
-    testShader = new BGShader("./BGShaders/Ocean.frag");
+    BackgroundShader = new BGShader("./BGShaders/Ocean.frag");
 
     // Initialize Audio
     if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,4,2048) < 0){
@@ -66,9 +76,13 @@ int OnExecute(){
 
     SDL_Event event;
 
-    InputProfile testProfile;
-    testProfile.save();
+    InputProfile testProfile("Default");
     KeyboardMapper testMapper(testProfile);
+
+    // TEST CODE
+    testBoard = new Board();
+    testPiece = new Piece(0,0,TileType::T,0);
+    //
 
     int frameBegin = SDL_GetTicks();
     int frameDelta = 0;
@@ -89,6 +103,31 @@ int OnExecute(){
     return 0;
 }
 
+void OnLoop(int dt){
+   
+}
+
+void OnRender(){
+    float fTime = (float)SDL_GetTicks()/1000.0f; 
+
+    glClearColor(0,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Draw Background
+    BackgroundShader->draw(&Resolution.x,fTime);
+
+    // Draw Gameplay
+    Renderer::BeginBatch();
+    
+    DrawBoard(glm::vec2{50,50},*testBoard);
+    DrawPiece(glm::vec2{50,50},*testPiece);
+
+    Renderer::EndBatch();
+    Renderer::Flush();
+
+    SDL_GL_SwapWindow(window);
+}
+
 void OnEvent(SDL_Event& event){
     switch(event.type){
     
@@ -105,11 +144,7 @@ void OnEvent(SDL_Event& event){
     }
 
     case SDL_KEYDOWN:
-        switch (event.key.keysym.scancode){
-
-            default:
-            break;
-        }
+        OnInput(event);
     break;
 
     default:
@@ -117,38 +152,17 @@ void OnEvent(SDL_Event& event){
     }
 }
 
-void OnLoop(int dt){
-    // float delta = ((float)dt / 1000.0f);
+void OnInput(SDL_Event& event){
+    switch (event.key.keysym.scancode){
+
+        default:
+        break;
+    }
 }
 
-void OnRender(){
-    float fTime = (float)SDL_GetTicks()/1000.0f; 
-
-    glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Draw Background
-    testShader->draw(testRes,fTime);
-
-    // Draw Gameplay
-    Renderer::BeginBatch();
-
-    Renderer::EndBatch();
-    Renderer::Flush();
-
-    // Draw Other Boards
-    Renderer::BeginBatch();
-
-    Renderer::EndBatch();
-    Renderer::Flush();
-
-    SDL_GL_SwapWindow(window);
-}
-
-// Window Events
 void OnResize(int width, int height){
-    testRes[0] = width;
-    testRes[1] = height;
+    Resolution.x = width;
+    Resolution.y = height;
     glViewport(0,0,width,height);
     glm::mat4 viewProjection = glm::ortho(0.0f,(float)width,(float)height,0.0f,-1.0f,1.0f);
     glm::mat4 viewTransform = glm::mat4(1);

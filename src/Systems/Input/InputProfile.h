@@ -10,7 +10,6 @@
 namespace fs = std::filesystem;
 
 struct InputProfile {
-
     const std::string kProfileDirectory = "./Profiles/";
     const std::string kFileExtension = ".pro";
     
@@ -74,13 +73,14 @@ struct InputProfile {
             keys[i] = SDL_GetScancodeFromName(keyname.c_str());
         }
 
+        SDL_Log("Loaded profile \"%s\" from \"%s\"",name.c_str(), path.c_str()); 
     }
 
     void save() {
         std::string path = kProfileDirectory + name + kFileExtension;
         std::ofstream out(path, std::ios::trunc | std::ios::out);
         write(out);
-        SDL_Log("Wrote %s to %s",name.c_str(), path.c_str()); 
+        SDL_Log("Wrote profile \"%s\" to \"%s\"",name.c_str(), path.c_str()); 
     }
 
     void print(){
@@ -94,6 +94,6 @@ struct InputProfile {
         out << dropArr << '\n';
 
         for (int i=0; i<8; i++)
-            out << SDL_GetKeyName(keys[i]) << '\n';
+            out << SDL_GetKeyName(SDL_GetKeyFromScancode(((SDL_Scancode)keys[i]))) << '\n';
     }
 };

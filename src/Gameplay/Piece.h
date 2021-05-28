@@ -12,7 +12,10 @@ class Piece {
     Connection* connections;
 
     int x,y;
-    Piece(int x,int y, Tile type);
+    Piece(int x,int y, Tile type, int rotation) : x(x), y(y) {
+        tiles = PieceDefintions::getPieceTiles(type, rotation);
+        connections = PieceDefintions::getPieceConnections(type, rotation);
+    }
     
     inline Tile tileAt(int x, int y) { return tiles[x + 4 * y]; };
 	inline Connection connectionAt(int x, int y) { return connections[x + y * 4]; }
@@ -25,5 +28,4 @@ class Piece {
     void rotateCCW();
 	void rotateCW();
 	void flip();
-
 };

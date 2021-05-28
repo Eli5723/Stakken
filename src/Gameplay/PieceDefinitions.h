@@ -2,10 +2,10 @@
 
 #include "./Tile.h"
 struct PieceDefintions {
-    static const int PieceSize = 4 * 4;
-    static const int RotationOffset = 7 * PieceSize;
+    static const int kPieceSize = 4 * 4;
+    static const int kRotationOffset = 7 * kPieceSize;
 
-    static constexpr Tile tiles[RotationOffset * 4]{
+    static constexpr Tile tiles[kRotationOffset * 4]{
         -1,+1,-1,-1,
         +1,+1,+1,-1,
         -1,-1,-1,-1,
@@ -149,7 +149,7 @@ struct PieceDefintions {
         +1,+1,+1,+1,
         -1,-1,-1,-1,
     };
-    static constexpr Connection connections[RotationOffset * 4]{
+    static constexpr Connection connections[kRotationOffset * 4]{
         0,2,0,0,
         4,13,1,0,
         0,0,0,0,
@@ -293,4 +293,7 @@ struct PieceDefintions {
         4,5,5,1,
         0,0,0,0,
     };
+
+    static Tile* getPieceTiles(Tile type, int rotation) { return const_cast<Tile*>(&tiles[type * kPieceSize]); }
+    static Connection* getPieceConnections(Tile type, int rotation) { return const_cast<Connection*>(&connections[type * kPieceSize]); }
 };
