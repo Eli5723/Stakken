@@ -1,11 +1,9 @@
 #pragma once
 
 #include "./Tile.h"
-struct PieceDefintions {
     static const int kPieceSize = 4 * 4;
     static const int kRotationOffset = 7 * kPieceSize;
-
-    static constexpr Tile tiles[kRotationOffset * 4]{
+    static Tile tiles[kRotationOffset * 4]{
         -1,+1,-1,-1,
         +1,+1,+1,-1,
         -1,-1,-1,-1,
@@ -149,7 +147,7 @@ struct PieceDefintions {
         +1,+1,+1,+1,
         -1,-1,-1,-1,
     };
-    static constexpr Connection connections[kRotationOffset * 4]{
+    static Connection connections[kRotationOffset * 4]{
         0,2,0,0,
         4,13,1,0,
         0,0,0,0,
@@ -294,6 +292,8 @@ struct PieceDefintions {
         0,0,0,0,
     };
 
-    static Tile* getPieceTiles(Tile type, int rotation) { return const_cast<Tile*>(&tiles[type * kPieceSize]); }
-    static Connection* getPieceConnections(Tile type, int rotation) { return const_cast<Connection*>(&connections[type * kPieceSize]); }
+
+struct PieceDefintions {
+    static Tile* getPieceTiles(Tile type, int rotation) {             return &tiles      [(type * kPieceSize) + (rotation * kRotationOffset)]; }
+    static Connection* getPieceConnections(Tile type, int rotation) { return &connections[(type * kPieceSize) + (rotation * kRotationOffset)]; }
 };

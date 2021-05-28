@@ -2,6 +2,7 @@
 #include "./Piece.h"
 #include "./Tile.h"
 #include "../Systems/Rendering/Renderer.h"
+#include <SDL2/SDL.h>
 
 // Constants
 const int kBoardWidth = 10;
@@ -47,7 +48,7 @@ void Board::Row::empty() {
 
 // The Board 
 Board::Board() {
-	rows = new Row * [kTotalRows];
+	rows = new Row* [kTotalRows];
 	for (int i = 0; i < kTotalRows; i++) {
 		rows[i] = new Row();
 	}
@@ -66,14 +67,17 @@ void Board::ApplyPiece(Piece* piece) {
 
 	for (int j = 0; j < 4; j++) {
 		for (int i = 0; i < 4; i++) {
-			if (piece->tileAt(i, j) < 0)
+			if (piece->tileAt(i, j) == TileType::Empty){
 				continue;
+			}
 
-			rows[piece->y + j]->connections[i] = piece->connectionAt(i, j);
+			rows[piece->y + j]->contents[i + piece->x] = piece->tileAt(i, j);
+			rows[piece->y + j]->connections[i+ piece->x] = piece->connectionAt(i, j);
+			rows[piece->y + j]->fill++;
 		}
 
-		if (rows[piece->y + j]->isFull()) {
-
+		if (piece->y + j < kTotalRows &&rows[piece->y + j]->isFull()) {
+			removeLine(piece->y + j);
 			linesCleared++;
 		}
 	}
@@ -106,28 +110,61 @@ void Board::addLine(int hole) {
 		garbageRow->connections[hole + 1] &= ~Side::Left;
 }
 
-bool Board::pieceFits(Piece* piece) {
-	for (int i = 0, j = 0; i < 4; j++, i++) {
-		if (piece->tileAt(i, j) == -1)
-			continue;
+bool Board::checkFit(Piece* piece) {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (piece->tileAt(i, j) == TileType::Empty)
+				continue;
+			if (piece->x + i< 0)
+				return false;
 
-		if (piece->x < 0)
-			return false;
+			if (piece->y + j >= kTotalRows){
+				return false;
+			}
+			if (i + piece->x >= kBoardWidth)
+				return false;
 
-		if (i + piece->x > kBoardWidth)
-			return false;
-
-		if (j + piece->y >= kBoardHeight)
-			return false;
-
-		//Check if overlapping with another piece
-		if (tileAt(piece->x + i, piece->y + j != -1))
-			return false;
+			//Check if overlapping with another piece
+			if (tileAt(piece->x + i, piece->y + j) != TileType::Empty){
+				return false;
+			}
+		}
 	}
 
 	return true;
 }
  
+bool Board::offsetTest(Piece* piece){
+	if (checkFit(piece)) //-1,0
+		return true;
+	piece->x--;
+	if (checkFit(piece)) //-1,0
+		return true;
+	piece->x+=2; //1,0
+	if (checkFit(piece))
+		return true;
+	piece->x--; //0,-1
+	piece->y++;
+	if (checkFit(piece))
+		return true;
+	piece->x--; //-1,-1
+	if (checkFit(piece))
+		return true;
+	piece->x+=2; //1,-1
+	if (checkFit(piece))
+		return true;
+	piece->y--;
+	piece->x-=3; //-2,0
+	if (checkFit(piece))
+		return true;
+	piece->x+=4; //2,0
+	if (checkFit(piece))
+		return true;
+	piece->x-=2;
+
+	return false;
+}
+
 void Board::clear() {
 	for (int i = 0; i < kTota; i++) {
 		rows[i]->empty();

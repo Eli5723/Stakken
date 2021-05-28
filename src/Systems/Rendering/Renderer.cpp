@@ -139,8 +139,8 @@ void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 
 	glGenTextures(1, &s_Data.WhiteTexture); 
 	glBindTexture(GL_TEXTURE_2D, s_Data.WhiteTexture); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
 	uint32_t color = 0xFFFFFFFF;
@@ -343,14 +343,14 @@ void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, uint32
 	s_Data.IndexCount += 6;
 }
 
-void Renderer::QuadBox(const glm::vec2& position, const glm::vec2& size, const float &thickness, const glm::vec4& color) {
+void Renderer::QuadBox(const glm::vec2& position, const glm::vec2& size, const float thickness, const glm::vec4& color) {
 	DrawQuad(position + glm::vec2(-thickness,-thickness), { size.x + 2*thickness, thickness }, color);
-	DrawQuad(position + glm::vec2(-thickness, size.y), { size.x + 2*thickness, 2 }, color);
-	DrawQuad(position + glm::vec2(-thickness, 0), { 2,size.y }, color);
-	DrawQuad(position + glm::vec2(size.x, 0), { 2,size.y}, color);
+	DrawQuad(position + glm::vec2(-thickness, size.y), { size.x + 2*thickness, thickness}, color);
+	DrawQuad(position + glm::vec2(-thickness, 0), { thickness,size.y }, color);
+	DrawQuad(position + glm::vec2(size.x, 0), { thickness,size.y}, color);
 }
 	
-void Renderer::BlackBox(const glm::vec2& position, const glm::vec2& size, const float& thickness) {
+void Renderer::BlackBox(const glm::vec2& position, const glm::vec2& size, const float thickness) {
 	DrawQuad(position, size, {0,0,0,.7 });
 	DrawQuad(position + glm::vec2(-thickness, -thickness), { size.x + 2 * thickness, thickness }, { 1,1,1,1 });
 	DrawQuad(position + glm::vec2(-thickness, size.y), { size.x + 2 * thickness, 2 }, { 1,1,1,1 });

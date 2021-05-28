@@ -18,7 +18,6 @@ class KeyboardMapper {
         SoftDropping = false;
     }
 
-
     // Handle key presses, instantaenous actions
     void keyEvents(SDL_Scancode input){
         if (input==profile.rcw) { 
@@ -67,8 +66,8 @@ class KeyboardMapper {
 
         if (input==profile.softDrop) {
             repeatKey = profile.softDrop;
-            buffer.queue(TetrisAction::Right);
-            currentAction = TetrisAction::Right;
+            buffer.queue(TetrisAction::SoftDrop);
+            currentAction = TetrisAction::SoftDrop;
 
             timeToRepeat = profile.das;
             return;
@@ -85,8 +84,10 @@ class KeyboardMapper {
 
             // Handle Soft Drop auto repeat
             if (currentAction == TetrisAction::SoftDrop){
-                timeToRepeat += profile.dropArr;
-                buffer.queue(currentAction);
+                while (timeToRepeat < 0 && maxActions--){
+                    timeToRepeat += profile.dropArr;
+                    buffer.queue(currentAction);
+                }
                 return;
             }
             // Handle Side auto repeat

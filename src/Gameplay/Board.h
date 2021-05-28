@@ -39,6 +39,7 @@ struct Board {
 
 	void addLine(int hole);
 
-	bool pieceFits(Piece* piece);
+	bool checkFit(Piece* piece);
+	bool offsetTest(Piece* piece);
 };
 

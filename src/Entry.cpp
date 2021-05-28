@@ -19,6 +19,7 @@
 #include "./Gameplay/Tile.h"
 #include "./Gameplay/Piece.h"
 #include "./Gameplay/Board.h"
+#include "./Gameplay/Game.h"
 #include "./Gameplay/RenderGame.h"
 
 const int WINDOW_WIDTH = 640;
@@ -28,14 +29,14 @@ const int WINDOW_HEIGHT = 480;
 // Pointers
 BGShader* BackgroundShader;
 
-glm::vec2 Resolution;
+glm::vec2 Resolution{WINDOW_WIDTH,WINDOW_HEIGHT};
 
 bool Running = true;
 SDL_Window* window;
 
 // Test variables
-Piece* testPiece;
-Board* testBoard;
+Game* testGame;
+KeyboardMapper* keyboard;
 
 bool OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -51,6 +52,7 @@ bool OnInit(){
     glClearColor(0,0,0,1);
 
     Resolution = glm::vec2{WINDOW_WIDTH,WINDOW_HEIGHT};
+    glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
     glm::mat4 testProjection = glm::ortho(0.0f,Resolution.x,Resolution.y,0.0f,-1.0f,1.0f);
     glm::mat4 testTransform = glm::mat4(1);
     
@@ -74,19 +76,19 @@ int OnExecute(){
     if (OnInit() == false)
         return -1;
 
-    SDL_Event event;
-
-    InputProfile testProfile("Default");
-    KeyboardMapper testMapper(testProfile);
-
+    
     // TEST CODE
-    testBoard = new Board();
-    testPiece = new Piece(0,0,TileType::T,0);
-    //
+    InputProfile testProfile;
+    testProfile.save();
+    keyboard = new KeyboardMapper(testProfile);
+
+    testGame = new Game();
+
 
     int frameBegin = SDL_GetTicks();
     int frameDelta = 0;
 
+    SDL_Event event;
     while (Running) {
         int newTime = SDL_GetTicks();
         frameDelta = newTime - frameBegin; 
@@ -104,7 +106,10 @@ int OnExecute(){
 }
 
 void OnLoop(int dt){
-   
+    keyboard->update(dt);
+    testGame->ApplyInput(keyboard->buffer);
+    keyboard->buffer.flush();
+    testGame->Update(dt);
 }
 
 void OnRender(){
@@ -119,8 +124,7 @@ void OnRender(){
     // Draw Gameplay
     Renderer::BeginBatch();
     
-    DrawBoard(glm::vec2{50,50},*testBoard);
-    DrawPiece(glm::vec2{50,50},*testPiece);
+    DrawGame({100,100},*testGame);
 
     Renderer::EndBatch();
     Renderer::Flush();
@@ -158,6 +162,8 @@ void OnInput(SDL_Event& event){
         default:
         break;
     }
+    
+    keyboard->keyEvents(event.key.keysym.scancode);
 }
 
 void OnResize(int width, int height){

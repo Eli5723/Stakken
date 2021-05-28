@@ -1,11 +1,18 @@
 1000
 500
-200
+500
+0
+0
+0
+0
+0
+0
+0
 A
 D
 Keypad 5
 Space
 Left Shift
-Keypad 4
 Keypad 6
+Keypad 4
 Keypad 8

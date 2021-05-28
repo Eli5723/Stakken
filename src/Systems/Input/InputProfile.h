@@ -35,13 +35,27 @@ struct InputProfile {
         };
     };
 
+    // Initial Piece Rotation
+    union {
+        int rotation[7];
+        struct {
+            int T_rotation;
+            int O_rotation;
+            int L_rotation;
+            int J_rotation;
+            int Z_rotation;
+            int S_rotation;
+            int I_rotation;
+        };
+    };
+
     // Default Profile
     InputProfile(){
         name = "Default";
     
         das = 1000;
         arr = 500;
-        dropArr = 200;
+        dropArr = 500;
 
         // Piece Movement settings
         left = SDL_SCANCODE_A;
@@ -51,10 +65,14 @@ struct InputProfile {
         hardDrop = SDL_SCANCODE_SPACE;
         sonicDrop = SDL_SCANCODE_LSHIFT;
         
-        rcw = SDL_SCANCODE_KP_4;
-        rccw = SDL_SCANCODE_KP_6;
+        rcw = SDL_SCANCODE_KP_6;
+        rccw = SDL_SCANCODE_KP_4;
         flip = SDL_SCANCODE_KP_8;
+
+        for (int i = 0; i < 7; i++)
+            rotation[i] = 0;
     }
+
     // Load existing profile from file
     InputProfile(const std::string& name){
         this->name = name;
@@ -65,6 +83,15 @@ struct InputProfile {
         input >> das;
         input >> arr;
         input >> dropArr;
+       
+        input >>  T_rotation;
+        input >>  O_rotation;
+        input >>  L_rotation;
+        input >>  J_rotation;
+        input >>  Z_rotation;
+        input >>  S_rotation;
+        input >>  I_rotation;
+
         input.ignore();
 
         std::string keyname;
@@ -92,6 +119,14 @@ struct InputProfile {
         out << das << '\n';
         out << arr << '\n';
         out << dropArr << '\n';
+
+        out <<  T_rotation << '\n';
+        out <<  O_rotation << '\n';
+        out <<  L_rotation << '\n';
+        out <<  J_rotation << '\n';
+        out <<  Z_rotation << '\n';
+        out <<  S_rotation << '\n';
+        out <<  I_rotation << '\n';
 
         for (int i=0; i<8; i++)
             out << SDL_GetKeyName(SDL_GetKeyFromScancode(((SDL_Scancode)keys[i]))) << '\n';

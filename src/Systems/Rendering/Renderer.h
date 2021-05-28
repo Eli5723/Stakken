@@ -20,8 +20,8 @@ public:
 	static void DrawQuad(const glm::vec2& position, const glm::vec2& size, uint32_t textureId);
 	static void DrawQuad(const glm::vec2& position, const glm::vec2& size, uint32_t textureId, const glm::vec4& color);
 
-	static void QuadBox(const glm::vec2& position, const glm::vec2& size, const float& thickness, const glm::vec4& color);
-	static void BlackBox(const glm::vec2& position, const glm::vec2& size, const float& thickness);
+	static void QuadBox(const glm::vec2& position, const glm::vec2& size, const float thickness, const glm::vec4& color);
+	static void BlackBox(const glm::vec2& position, const glm::vec2& size, const float thickness);
 
 
 	// static void DrawStr(const glm::vec2& position,float scale, std::string str, Font* font);
