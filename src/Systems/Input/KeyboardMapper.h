@@ -10,6 +10,7 @@ class KeyboardMapper {
     Uint8 repeatKey;
 
     int timeToRepeat;
+    int timeToRepeatDrop;
 
     bool SoftDropping;
 
@@ -65,11 +66,9 @@ class KeyboardMapper {
         }
 
         if (input==profile.softDrop) {
-            repeatKey = profile.softDrop;
             buffer.queue(TetrisAction::SoftDrop);
-            currentAction = TetrisAction::SoftDrop;
 
-            timeToRepeat = profile.das;
+            timeToRepeatDrop = profile.dropArr;
             return;
         }
     }
@@ -77,19 +76,21 @@ class KeyboardMapper {
     // Poll Keyboard to check for repeats
     void update(int timeElapsed){
         const Uint8* keys = SDL_GetKeyboardState(NULL);
+        int maxActions = 9;
+
+
+        // Handle Soft Drop auto repeat
+        if (keys[profile.softDrop]){
+            timeToRepeatDrop-=timeElapsed;
+            while (timeToRepeatDrop < 0 && maxActions--){
+                timeToRepeatDrop += profile.dropArr;
+                buffer.queue(TetrisAction::SoftDrop);
+            }
+        }
 
         if (currentAction != TetrisAction::None && keys[repeatKey]) {
             timeToRepeat-=timeElapsed;
-            int maxActions = 9;
 
-            // Handle Soft Drop auto repeat
-            if (currentAction == TetrisAction::SoftDrop){
-                while (timeToRepeat < 0 && maxActions--){
-                    timeToRepeat += profile.dropArr;
-                    buffer.queue(currentAction);
-                }
-                return;
-            }
             // Handle Side auto repeat
             while (timeToRepeat < 0 && maxActions--){
                 timeToRepeat += profile.arr;

@@ -53,9 +53,9 @@ struct InputProfile {
     InputProfile(){
         name = "Default";
     
-        das = 1000;
-        arr = 500;
-        dropArr = 500;
+        das = 110;
+        arr = 0;
+        dropArr = 100;
 
         // Piece Movement settings
         left = SDL_SCANCODE_A;

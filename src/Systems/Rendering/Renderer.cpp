@@ -92,6 +92,7 @@ static RendererData s_Data;
 // Driver Methods
 void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	s_Data.quadShader = new Shader(fragmentShader,vertexShader);
+	s_Data.quadShader->fillSamplers();
 	SetView(viewProjection,viewTransform);
 
 	s_Data.QuadBuffer = new Vertex[MaxVertexCount];

@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "../Systems/Rendering/Renderer.h"
+#include "../Systems/Assets/Texture.h"
 
 const float kTileSize = 16.0f;
 
@@ -13,16 +14,25 @@ const glm::vec2 kBoardDimensions{kTileSize * Board::kWidth, kTileSize * Board::k
 float kMargin = 1.0f;
 const glm::vec2 kMarginDimensions{kMargin, kMargin};
 
-void DrawPiece(const glm::vec2& position, Piece& piece){
+void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture){
     for (int y=0; y < 4; y++){
         for (int x = 0; x < 4; x++){
             if (piece.tileAt(x,y) != TileType::Empty)
-                Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, {1,1,1,1});
+                Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture.id, identity.color_table.entries[piece.type]);
         }
     }
 }
 
-void DrawBoard(const glm::vec2& position, Board& board){
+void DrawGhostPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture){
+    for (int y=0; y < 4; y++){
+        for (int x = 0; x < 4; x++){
+            if (piece.tileAt(x,y) != TileType::Empty)
+                Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture.id, identity.color_table.entries[piece.type] * glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});
+        }
+    }
+}
+
+void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture& texture){
     // Draw "Board" background + Border
     Renderer::QuadBox(position, kBoardDimensions, kMargin, {1,1,1,1});
     Renderer::DrawQuad(position, kBoardDimensions, {0,0,0,1});
@@ -30,15 +40,16 @@ void DrawBoard(const glm::vec2& position, Board& board){
     //Draw Tiles
     for (int y = 0; y < Board::kHeight;y++){
         for (int x=0; x < Board::kWidth; x++){
-            if (board.tileAt(x,y + Board::kOverflowRows) != TileType::Empty)
-                Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions,{1,1,1,1});
+            int type = board.tileAt(x,y + Board::kOverflowRows);
+            if (type != TileType::Empty)
+                Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture.id, identity.color_table.entries[(int)type]);
         }
     }
 }
 
-void DrawGame(const glm::vec2& position, Game& game){
-    DrawBoard(position, *game.board);
-    DrawPiece(position + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece);
+void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture& texture){
+    DrawBoard(position, *game.board, identity, texture);
+    DrawPiece(position + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece, identity, texture);
     
     // Draw Ghost Piece
     int oldY = game.heldPiece->y;
@@ -46,6 +57,12 @@ void DrawGame(const glm::vec2& position, Game& game){
         game.heldPiece->moveDown();
     game.heldPiece->moveUp();
 
-    DrawPiece(position + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece);
+    DrawGhostPiece(position + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece, identity, texture);
     game.heldPiece->y = oldY;
+
+    // Draw Next Piece Preview
+    const glm::vec2 previewPosition = position  + glm::vec2{kBoardDimensions.x + 16,0};
+    Renderer::QuadBox(previewPosition, kPieceDimensions, kMargin, {1,1,1,1});
+    Renderer::DrawQuad(previewPosition, kPieceDimensions, {0,0,0,1});
+    DrawPiece(previewPosition, *game.nextPiece, identity, texture);
 }

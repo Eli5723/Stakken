@@ -16,6 +16,8 @@
 #include "./Systems/Rendering/Renderer.h"
 #include "./Systems/Rendering/ScreenQuad.h"
 
+#include "./Systems/Identity.h"
+
 #include "./Gameplay/Tile.h"
 #include "./Gameplay/Piece.h"
 #include "./Gameplay/Board.h"
@@ -36,7 +38,9 @@ SDL_Window* window;
 
 // Test variables
 Game* testGame;
+Identity testIdentity{defaultIdentity};
 KeyboardMapper* keyboard;
+Texture* testTexture;
 
 bool OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -46,13 +50,15 @@ bool OnInit(){
     // Initialize Graphics
     gl3wInit();
 
-    window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH*2, WINDOW_HEIGHT*2, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     SDL_GL_CreateContext(window);
 
     glClearColor(0,0,0,1);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 
     Resolution = glm::vec2{WINDOW_WIDTH,WINDOW_HEIGHT};
-    glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
+    glViewport(0,0,WINDOW_WIDTH*2,WINDOW_HEIGHT*2);
     glm::mat4 testProjection = glm::ortho(0.0f,Resolution.x,Resolution.y,0.0f,-1.0f,1.0f);
     glm::mat4 testTransform = glm::mat4(1);
     
@@ -81,7 +87,8 @@ int OnExecute(){
     InputProfile testProfile;
     testProfile.save();
     keyboard = new KeyboardMapper(testProfile);
-
+    testTexture = new Texture("./Textures/TGF2.png");
+    SDL_Log("test %d",testTexture->id);
     testGame = new Game();
 
 
@@ -124,7 +131,7 @@ void OnRender(){
     // Draw Gameplay
     Renderer::BeginBatch();
     
-    DrawGame({100,100},*testGame);
+    DrawGame({100,100},*testGame,testIdentity,*testTexture);
 
     Renderer::EndBatch();
     Renderer::Flush();

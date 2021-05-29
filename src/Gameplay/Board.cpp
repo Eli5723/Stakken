@@ -71,7 +71,7 @@ void Board::ApplyPiece(Piece* piece) {
 				continue;
 			}
 
-			rows[piece->y + j]->contents[i + piece->x] = piece->tileAt(i, j);
+			rows[piece->y + j]->contents[i + piece->x] = piece->type;
 			rows[piece->y + j]->connections[i+ piece->x] = piece->connectionAt(i, j);
 			rows[piece->y + j]->fill++;
 		}
