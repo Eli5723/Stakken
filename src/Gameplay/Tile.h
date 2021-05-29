@@ -17,7 +17,7 @@ enum TileType : Tile {
 typedef uint8_t Connection;
 enum Side : Connection {
     Up    = 0b1000,
-    Right = 0b0000,
+    Right = 0b0100,
     Down  = 0b0010,
     Left  = 0b0001,
 };

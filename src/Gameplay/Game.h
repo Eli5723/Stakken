@@ -98,8 +98,11 @@ struct Game {
 	}
 
 	void ApplyHeldPiece(){
+		Piece* temp = heldPiece;
+
 		board->ApplyPiece(heldPiece);
 		heldPiece = nextPiece;
-		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(rand()%7), 0);
+		
+		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, (TileType)(rand()%7), 0);
 	}
 };

@@ -18,9 +18,7 @@
 
 #include "./Systems/Identity.h"
 
-#include "./Gameplay/Tile.h"
-#include "./Gameplay/Piece.h"
-#include "./Gameplay/Board.h"
+
 #include "./Gameplay/Game.h"
 #include "./Gameplay/RenderGame.h"
 
@@ -131,7 +129,8 @@ void OnRender(){
     // Draw Gameplay
     Renderer::BeginBatch();
     
-    DrawGame({100,100},*testGame,testIdentity,*testTexture);
+    DrawGame({kGaps,100},*testGame,testIdentity,*testTexture);
+    DrawGame(glm::vec2{kGameDimensions.x + kGaps,100},*testGame,testIdentity,*testTexture);
 
     Renderer::EndBatch();
     Renderer::Flush();

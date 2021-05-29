@@ -42,7 +42,7 @@ void Board::Row::makeFull() {
 
 void Board::Row::empty() {
 	memset(contents, TileType::Empty, sizeof(Tile) * kBoardWidth);
-	memset(connections, 0, kBoardWidth);
+	memset(connections, 0, sizeof(Connection) * kBoardWidth);
 	fill = 0;
 }
 

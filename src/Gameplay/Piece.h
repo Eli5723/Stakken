@@ -20,6 +20,16 @@ class Piece {
         connections = PieceDefintions::getPieceConnections(type, rotation);
     }
     
+    Piece* Convert(int x,int y, Tile type, int rotation){
+        this->x = x;
+        this->y = y;
+        this->type = type;
+        this->rotation_index = rotation;
+        tiles = PieceDefintions::getPieceTiles(type, rotation);
+        connections = PieceDefintions::getPieceConnections(type, rotation);
+        return this;
+    }
+
     inline Tile tileAt(int x, int y) { return tiles[x + 4 * y]; };
 	inline Connection connectionAt(int x, int y) { return connections[x + y * 4]; }
 

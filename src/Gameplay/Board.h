@@ -9,7 +9,7 @@ struct Board {
 
 	struct Row {
 		Tile* contents;
-		uint8_t* connections;
+		Connection* connections;
 
 		int fill;
 
@@ -29,7 +29,8 @@ struct Board {
 	Board();
 	~Board();
 
-	inline Tile tileAt(int x, int y){ return rows[y]->contents[x]; };
+	inline Tile tileAt(int x, int y) { return rows[y]->contents[x]; };
+	inline Connection connectionAt(int x, int y){ return rows[y]->connections[x]; };
 
 	void ApplyPiece(Piece* piece);
 
