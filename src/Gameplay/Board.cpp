@@ -35,7 +35,7 @@ inline void Board::Row::maskConnections(int mask) {
 void Board::Row::makeFull() {
 	const uint8_t CONN_MID = Side::Left | Side::Right | Side::Down;
 
-	memset(contents, TileType::Empty, kBoardWidth);
+	memset(contents, TileType::Garbage, kBoardWidth);
 	memset(connections, CONN_MID, kBoardWidth);
 	fill = kBoardWidth;
 }

@@ -15,6 +15,7 @@ class Shader {
 		void setInt(const char* name, int value);
 		void setFloat(const char* name, float value);
 		void setMat4(const char* name, const glm::mat4& );
+		void setMat4Offset(const char* name, const glm::mat4 &value, int offset);
 		void setVec2(const char* name, float* value);
 		void fillSamplers();
 };

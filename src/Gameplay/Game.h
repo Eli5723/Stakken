@@ -4,6 +4,8 @@
 #include "./Piece.h"
 #include "./Tile.h"
 #include "../Systems/Input/InputBuffer.h"
+#include "./Randomizers/xoroshiroRandomizer.h"
+
 
 #include <SDL2/SDL.h>
 
@@ -20,13 +22,20 @@ struct Game {
 	Piece* heldPiece;
 	Piece* nextPiece;
 
+	xoroshiroRandomizer pieceRandomizer;
+	xoroshiroRandomizer holeRandomizer;
 	int time;
 
 	Game() {
 		board = new Board();
-		
-		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(rand()%7), 0);
-		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(rand()%7), 0);
+
+		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
+		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
+	}
+
+	~Game(){
+		delete heldPiece;
+		delete nextPiece;
 	}
 
 	void Update(int dt){
@@ -103,6 +112,6 @@ struct Game {
 		board->ApplyPiece(heldPiece);
 		heldPiece = nextPiece;
 		
-		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, (TileType)(rand()%7), 0);
+		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
 	}
 };

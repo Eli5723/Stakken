@@ -12,7 +12,7 @@ static const char* vertexShader = R"(
 	layout (location = 1) in vec4 a_Color;
 	layout (location = 2) in vec2 a_TexCoord;
 	layout (location = 3) in float a_TexIndex;
-	layout (location = 4) in uint a_view;
+	layout (location = 4) in int a_view;
 
 	uniform mat4 u_projection[4];
 	uniform mat4 u_transform[4];
@@ -23,7 +23,10 @@ static const char* vertexShader = R"(
 
 	void main()
 	{
-		gl_Position = u_projection[0] * u_transform[0] * vec4(a_Pos, 1.0);
+		if (a_view == 0)
+			gl_Position = u_projection[0] * u_transform[0] * vec4(a_Pos, 1.0);
+		if (a_view > 0)
+			gl_Position = u_projection[1] * u_transform[1] * vec4(a_Pos, 1.0);
 		v_Color = a_Color;
 		v_TexCoord = a_TexCoord;
 		v_TexIndex = a_TexIndex;
@@ -69,7 +72,7 @@ struct Vertex {
 
 struct RendererData {
 	Shader* quadShader;
-	GLuint currentView = 0;
+	GLint currentView = 0;
 
 
 	GLuint QuadVA = 0;
@@ -93,14 +96,15 @@ static RendererData s_Data;
 void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	s_Data.quadShader = new Shader(fragmentShader,vertexShader);
 	s_Data.quadShader->fillSamplers();
-	SetView(viewProjection,viewTransform);
+	s_Data.currentView = 0;
+	SetView(viewProjection,viewTransform, 0);
 
 	s_Data.QuadBuffer = new Vertex[MaxVertexCount];
 	
 	glGenVertexArrays(1, &s_Data.QuadVA); 
 	glBindVertexArray(s_Data.QuadVA); 
 	
-	glGenBuffers(1, &s_Data.QuadVB); 
+	glGenBuffers(1, &s_Data.QuadVB);
 	glBindBuffer(GL_ARRAY_BUFFER, s_Data.QuadVB);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * MaxVertexCount,nullptr, GL_DYNAMIC_DRAW); 
 	
@@ -117,7 +121,7 @@ void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texIndex));
 
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 1, GL_UNSIGNED_INT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, view));
+	glVertexAttribPointer(4, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, view));
 	
 	uint32_t indices[MaxIndexCount];
 
@@ -154,10 +158,14 @@ void Renderer::Init(glm::mat4& viewProjection,glm::mat4& viewTransform) {
 	}
 }
 
-void Renderer::SetView(glm::mat4& viewProjection,glm::mat4& viewTransform){
+void Renderer::TargetView(int target){
+	s_Data.currentView = target;
+}
+
+void Renderer::SetView(glm::mat4& viewProjection,glm::mat4& viewTransform, int offset){
 	s_Data.quadShader->use();
-	s_Data.quadShader->setMat4("u_projection",viewProjection);
-	s_Data.quadShader->setMat4("u_transform",viewTransform);
+	s_Data.quadShader->setMat4Offset("u_projection[0]",viewProjection, offset);
+	s_Data.quadShader->setMat4Offset("u_transform[0]",viewTransform, offset);
 }
 
 void Renderer::Shutdown() {
@@ -197,8 +205,6 @@ void Renderer::Flush() {
 
 // Queue Methods
 void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color) {
-	Vertex* currentVertex = s_Data.QuadBufferPtr;
-
 	//If we run out of indices or textures slots, draw everything and reset the buffers
 	if (s_Data.IndexCount >= MaxIndexCount || s_Data.TextureSlotIndex > 31) {
 		EndBatch();
@@ -263,30 +269,32 @@ void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, uint32
 		s_Data.TextureSlotIndex++;
 	}
 
-	Vertex* currentVertex = s_Data.QuadBufferPtr;
-
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x, position.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 0.0f,0.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x + size.x, position.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 1.0f,0.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x + size.x, position.y + size.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 1.0f,1.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x, position.y + size.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 0.0f,1.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.IndexCount += 6;
@@ -315,30 +323,32 @@ void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size, uint32
 		s_Data.TextureSlotIndex++;
 	}
 
-	Vertex* currentVertex = s_Data.QuadBufferPtr;
-
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x, position.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 0.0f,0.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x + size.x, position.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 1.0f,0.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x + size.x, position.y + size.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 1.0f,1.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.QuadBufferPtr->position = glm::vec3(position.x, position.y + size.y, 0);
 	s_Data.QuadBufferPtr->color = color;
 	s_Data.QuadBufferPtr->texCoords = { 0.0f,1.0f };
 	s_Data.QuadBufferPtr->texIndex = textureIndex;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
 	s_Data.QuadBufferPtr++;
 
 	s_Data.IndexCount += 6;

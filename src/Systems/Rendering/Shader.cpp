@@ -109,6 +109,10 @@ void Shader::setMat4(const char* name, const glm::mat4 &value) {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name),1,false, &value[0][0]);
 }
 
+void Shader::setMat4Offset(const char* name, const glm::mat4 &value, int offset) {
+	glUniformMatrix4fv(glGetUniformLocation(ID, name) + offset,1,false, &value[0][0]);
+}
+
 void Shader::fillSamplers(){
 	glUseProgram(ID);
 	int samplers[32];
