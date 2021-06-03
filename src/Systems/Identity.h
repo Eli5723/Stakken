@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
-#include "Assets/ProfilePicture.h"
+#include "Assets/LinearTexture.h"
 
 #define rgbToFloat(r,g,b) {(float)r/255.0f,(float)g/255.0f,(float)b/255.0f,1}
 
@@ -13,7 +13,7 @@ struct ColorTable {
 struct Identity {
 	ColorTable color_table;
 	std::string name;
-	ProfilePicture* pfp;
+	LinearTexture* pfp;
 };
 
 const Identity defaultIdentity {{{

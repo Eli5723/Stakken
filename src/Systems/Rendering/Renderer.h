@@ -1,10 +1,13 @@
 #pragma once
 
+#include <string>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// #include "Systems/Assets/Font.h"
+#include "../Assets/Font.h"
+
 
 class Renderer {
 public:
@@ -26,5 +29,5 @@ public:
 	static void BlackBox(const glm::vec2& position, const glm::vec2& size, const float thickness);
 
 
-	// static void DrawStr(const glm::vec2& position,float scale, std::string str, Font* font);
+	static void DrawStr(const glm::vec2& position,float scale, std::string str, Font* font);
 };

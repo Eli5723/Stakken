@@ -31,6 +31,8 @@ struct Game {
 
 		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
 		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
+
+		time = 0;
 	}
 
 	~Game(){
@@ -39,7 +41,7 @@ struct Game {
 	}
 
 	void Update(int dt){
-
+		time += dt;
 	}
 
 	void ApplyInput(InputBuffer& input){

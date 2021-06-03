@@ -1,9 +1,9 @@
-#include "./ProfilePicture.h"
+#include "./LinearTexture.h"
 
 #include <GL/gl3w.h>
 #include <stb_image.h>
 
-ProfilePicture::ProfilePicture(const std::string& path) {
+LinearTexture::LinearTexture(const std::string& path) {
 	//Load Image
 	int width, height, nrChannels;
 	unsigned char* imageData = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);

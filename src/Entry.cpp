@@ -12,7 +12,8 @@
 #include "./Systems/Assets/Sound.h"
 #include "./Systems/Assets/Texture.h"
 #include "./Systems/Assets/BGShader.h"
-#include "./Systems/Assets/ProfilePicture.h"
+#include "./Systems/Assets/LinearTexture.h"
+#include "./Systems/Assets/Font.h"
 
 #include "./Systems/Rendering/Renderer.h"
 #include "./Systems/Rendering/ScreenQuad.h"
@@ -22,8 +23,8 @@
 #include "./Gameplay/Game.h"
 #include "./Gameplay/RenderGame.h"
 
-const int WINDOW_WIDTH = 1280;
-const int WINDOW_HEIGHT = 720;
+const int WINDOW_WIDTH = 1920;
+const int WINDOW_HEIGHT = 1080;
 
 enum class Space {
     MainGame,
@@ -78,6 +79,7 @@ Game* testGame;
 Identity testIdentity{defaultIdentity};
 KeyboardMapper* keyboard;
 Texture* testTexture;
+Font* testFont; 
 
 bool OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
@@ -132,7 +134,9 @@ int OnExecute(){
     keyboard = new KeyboardMapper(testProfile);
     testTexture = new Texture("./PieceTextures/TGF2.png");
     testGame = new Game();
-    testIdentity.pfp = new ProfilePicture("./Textures/eeli.png");
+    testIdentity.pfp = new LinearTexture("./Textures/eeli.png");
+
+    testFont = new Font("./Fonts/Futura");
 
 
     int frameBegin = SDL_GetTicks();
@@ -177,24 +181,23 @@ void OnRender(){
     Renderer::BeginBatch();
 
     Renderer::TargetView(0);
-    RenderGame::SetPixelTickness(ceil(1.0f/MainGameView.scale));
-    RenderGame::DrawGame({RenderGame::kGaps*2                    , 720.0f - RenderGame::kGameDimensions.y - RenderGame::kGaps*2}, *testGame, testIdentity, *testTexture);
-    
-    // const int columns = 10;
-    const glm::vec2 kgameAreaBounds({(1280.0f - (RenderGame::kGameDimensions.x + RenderGame::kGaps)) *2,RenderGame::kGameDimensions.y*2});
-    
+    Renderer::DrawStr({10,10},1,"abcdef\nghijklmn\nopqrstuvwxyz",testFont);
 
+    // RenderGame::SetPixelTickness(ceil(1.0f/MainGameView.scale));
+    // RenderGame::DrawGame({RenderGame::kGaps*2                    , 720.0f - RenderGame::kGameDimensions.y - RenderGame::kGaps*2}, *testGame, testIdentity, *testTexture);
+    
     // Draw other games
-    float otherWidth = 1280.0f;
+    float otherWidth = (1280.0f-RenderGame::kGameDimensions.x)  / OtherGameView.scale;
     Renderer::TargetView(1);
     RenderGame::SetPixelTickness(ceilf(1.0f/OtherGameView.scale));
 
     const int columns = 2;
-    float columnOffset = floorf(otherWidth/(float)columns);
+    float columnOffset = floorf(otherWidth/((float)columns+1.0f))*MainGameView.scale;
+    
     for (int i=0;i<4;i++){
         int row = i / columns;
         int column = i % columns;
-        RenderGame::DrawGame({columnOffset * column, (RenderGame::kGameDimensions.y + RenderGame::kMargin) * row}, *testGame, testIdentity, *testTexture);
+        RenderGame::DrawGame({columnOffset * column + floorf(RenderGame::kGameDimensions.x/2), (RenderGame::kGameDimensions.y + RenderGame::kMargin) * row}, *testGame, testIdentity, *testTexture);
     }
 
     Renderer::EndBatch();
@@ -254,5 +257,5 @@ void OnResize(int width, int height){
 }
 
 void OnCleanup(){
-    
+    Renderer::Shutdown();
 }

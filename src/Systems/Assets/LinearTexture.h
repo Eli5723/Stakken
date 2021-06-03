@@ -3,8 +3,8 @@
 #include <GL/gl3w.h>
 #include <string>
 
-class ProfilePicture {
+class LinearTexture {
 	public:
 		GLuint id;
-		ProfilePicture(const std::string& path);
+		LinearTexture(const std::string& path);
 };

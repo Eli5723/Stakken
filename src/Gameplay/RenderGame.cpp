@@ -5,6 +5,10 @@
 #include "../Systems/Rendering/Renderer.h"
 #include "../Systems/Assets/Texture.h"
 
+inline int min(int x){
+    return (x > 0 ? x : 0);
+}
+
 namespace RenderGame {
 
     float kMargin = 2.0f;
@@ -54,6 +58,33 @@ namespace RenderGame {
             }
         }
     }
+
+    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture, int cutoff){
+        for (int y=cutoff; y < 4; y++){
+            for (int x = 0; x < 4; x++){
+                if (piece.tileAt(x,y) != TileType::Empty){
+                    
+                    glm::vec2 tilePosition = position + glm::vec2{kTileSize * x, kTileSize * y};
+                    Renderer::DrawQuad(tilePosition, kTileDimensions, texture.id, identity.color_table.entries[piece.type]);
+
+                    const Connection connections = piece.connectionAt(x,y);
+                    if ((connections & Side::Up) ^ Side::Up)
+                        Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize,pixelThickness},{1,1,1,1});
+                    
+                    if ((connections & Side::Down) ^ Side::Down)
+                        Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize-1},glm::vec2{kTileSize,pixelThickness},{1,1,1,1});
+
+                    if ((connections & Side::Left) ^ Side::Left)
+                        Renderer::DrawQuad(tilePosition,glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
+
+                    if ((connections & Side::Right) ^ Side::Right)
+                        Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize-1,0},glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
+
+                }
+            }
+        }
+    }
+
 
     void DrawGhostPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture){
         for (int y=0; y < 4; y++){
@@ -120,8 +151,7 @@ namespace RenderGame {
         const glm::vec2 boardPosition = position + glm::vec2{0, kProfilePictureSize + kGaps};
 
         DrawBoard(boardPosition, *game.board, identity, texture);
-        DrawPiece(boardPosition + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece, identity, texture);
-        
+
         // Draw Ghost Piece
         int oldY = game.heldPiece->y;
         while (game.board->checkFit(game.heldPiece))
@@ -130,6 +160,9 @@ namespace RenderGame {
 
         DrawGhostPiece(boardPosition + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece, identity, texture);
         game.heldPiece->y = oldY;
+
+        // Draw Actual Piece after ghost piece to prevent blending 
+        DrawPiece(boardPosition + glm::vec2(game.heldPiece->x * kTileSize,(game.heldPiece->y - Board::kOverflowRows) * kTileSize), *game.heldPiece, identity, texture, ::min(Board::kOverflowRows - game.heldPiece->y));
 
         // Draw Next Piece Preview
         const glm::vec2 previewPosition = boardPosition  + kPreviewOffset;
