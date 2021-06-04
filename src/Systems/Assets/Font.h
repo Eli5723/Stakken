@@ -1,81 +1,124 @@
 #pragma once
 
-#include <cstdio>
-#include <cstring>
-
+#include <stb_truetype.h>
+#include <slurp.h>
+#include <GL/gl3w.h>
 #include <glm/glm.hpp>
 
-#include "./LinearTexture.h"
-
-typedef unsigned char Ascii;
+#include <string>
 
 
+typedef unsigned char u8;
 
-class Font {
-    public:
+
+inline void stamp(u8* target, u8* source, int x, int y, int width, int height, int stride) {
+    for (int i = 0; i < width; i++){
+        for (int j = 0; j < height; j++){
+            target[(x + i) + (y + j) * stride] = source[i + j * width];
+        }
+    }
+}
+
+struct Font {
     struct Glyph {
-        Ascii charcode;
         float advance;
-        glm::vec2 topLeft;
-        glm::vec2 topRight;
-        glm::vec2 bottomLeft;
-        glm::vec2 bottomRight;
-        glm::vec2 size;
+        glm::vec2 bearing;
+        glm::vec2 size;    
+        glm::vec2 leftTop;
+        glm::vec2 rightTop;
+        glm::vec2 leftBottom;
+        glm::vec2 rightBottom;
     };
 
-    LinearTexture* atlas;
-    Glyph* glyphs;
-    float lineHeight = 64;
+    GLuint atlasId;
+
+    float ascent;
+    float descent;
+    float lineGap;
+    float lineHeight;
+
+    Glyph glyphs[255];
 
     Font(const std::string& path){
-        // Load atlas
-        atlas = new LinearTexture(path + ".png");
-        glyphs = new Glyph[255];
+        // TODO: Atlas Cache
+        GenerateAtlas(path);
+    }
 
-        FILE* fp = fopen((path+".csv").c_str(),"r");
+    // Generates an atlas for a font if one has not been saved yet
+    void GenerateAtlas(const std::string& path){
+       
+        unsigned const char* fontFile = slurpuc((path + ".ttf").c_str());
 
-        int ascii;
-        float advance;
-        float left;
-        float bottom;
-        float right;
-        float top;
+        static stbtt_fontinfo* fontInfo = new stbtt_fontinfo;
+        stbtt_InitFont(fontInfo, fontFile,0);
         
-        float leftA;
-        float bottomA;
-        float rightA;
-        float topA;
-        float width = 396.0f;
-        float height = 396.0f;
-
-        int count = 0;
-        while(count < 94) {
-            fscanf(fp, "%i%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f%*c%f*[^\n]", &ascii, &advance, &left, &bottom, &right, &top,&leftA, &bottomA, &rightA, &topA);
-            Glyph& glyph = glyphs[ascii];
-
-            left = leftA / width;
-            right = rightA / width;
-            bottom = (height - bottomA) / height;
-            top = (height - topA) / height;
-
-            glyph.charcode = (Ascii)ascii;
-            glyph.advance = advance;
-            glyph.topLeft = {left,top};
-            glyph.topRight = {right,top};
-            glyph.bottomLeft = {left,bottom};
-            glyph.bottomRight = {right,bottom};
-            glyph.size = {rightA - leftA, topA - bottomA};
-            count++;
-            printf("Char: %c (%i)\n  Advance:%f\n  Left:%f\n  Bottom:%f\n  Right:%f\n  Top:%f\n  Size:%f,%f\n", ascii,count, advance, left, bottom, right, top,glyphs[ascii].size.x,glyphs[ascii].size.y);
+        // Calculate Atlas Size
+        float scale = stbtt_ScaleForPixelHeight(fontInfo, 32);
+        int totalWidth = 0;
+        int maxHeight = 0;
+        int x0,y0,x1,y1, width, height;
+        for (int charCode = 0; charCode < 256; charCode++){
+            stbtt_GetCodepointBitmapBox(fontInfo, charCode, scale, scale, &x0, &y0, &x1, &y1);
+            width = x1-x0;
+            height = y1-y0;
+            totalWidth += width;
+            maxHeight = maxHeight > height ? maxHeight : height;
         }
 
-        fclose(fp);
+        // Allocate atlas Bitmap
+        u8* atlasBitmap = new u8[totalWidth * maxHeight];
+
+        // TODO: Improve packing algorthim
+        int penX = 0;
+        int offsetX, offsetY, advanceWidth, leftSideBearing;
+        for (int charCode = 0; charCode < 256; charCode++){
+            // Add Glyph to bitmap
+            u8* bitmap = stbtt_GetCodepointBitmap(fontInfo, scale, scale, charCode, &width, &height, &offsetX, &offsetY);
+            stamp(atlasBitmap,bitmap,penX,0,width,height,totalWidth);
+            
+            stbtt_GetCodepointHMetrics(fontInfo, charCode, &advanceWidth, &leftSideBearing);
+
+            // Store Glyph Record
+            Glyph& glyph = glyphs[charCode];
+            glyph.advance = advanceWidth * scale;
+            glyph.bearing = {leftSideBearing * scale, offsetY};
+            glyph.size = {width, height};
+            glyph.leftTop = {(float)penX/(float)totalWidth,0};
+            glyph.rightTop = {(float)(penX+width)/(float)totalWidth,0};
+            glyph.leftBottom = {(float)penX/(float)totalWidth,(float)height/(float)maxHeight};
+            glyph.rightBottom = {(float)(penX+width)/(float)totalWidth,(float)height/(float)maxHeight};
+
+
+            penX+= width;
+            //stbtt_FreeBitmap(bitmap,0);
+        }        
+
+        // Calculate font vertical metrics
+        int ascent, descent, lineGap;
+        stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
+        this->ascent = (float)ascent * scale;
+        this->descent = (float)descent * scale;
+        this->lineGap = (float)lineGap * scale;
+        this->lineHeight = (float)(ascent - descent + lineGap) * scale;
+
+        glGenTextures(1, &atlasId);
+        glBindTexture(GL_TEXTURE_2D, atlasId);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA, totalWidth, maxHeight, 0, GL_RED, GL_UNSIGNED_BYTE, atlasBitmap);
+
+        delete[] atlasBitmap;
+        delete[] fontFile;
+
+        printf("Loaded font: %ix%i\n", totalWidth,maxHeight);
     }
 
 
-    ~Font(){
-        delete atlas;
-        delete [] glyphs;
-    }
-    
 };

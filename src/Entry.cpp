@@ -136,7 +136,7 @@ int OnExecute(){
     testGame = new Game();
     testIdentity.pfp = new LinearTexture("./Textures/eeli.png");
 
-    testFont = new Font("./Fonts/Futura");
+    testFont = new Font("./Fonts/Lato-Regular");
 
 
     int frameBegin = SDL_GetTicks();
@@ -182,6 +182,8 @@ void OnRender(){
 
     Renderer::TargetView(0);
     Renderer::DrawStr({10,10},1,"abcdef\nghijklmn\nopqrstuvwxyz",testFont);
+
+   // Renderer::DrawQuad({-fTime*200,0},{6729.0f/2.0f,54.0f/2.0f},testFont->atlasId);
 
     // RenderGame::SetPixelTickness(ceil(1.0f/MainGameView.scale));
     // RenderGame::DrawGame({RenderGame::kGaps*2                    , 720.0f - RenderGame::kGameDimensions.y - RenderGame::kGaps*2}, *testGame, testIdentity, *testTexture);

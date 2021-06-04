@@ -34,31 +34,31 @@ static const char* vertexShader = R"(
 	}
 )";
 
-// static const char* fragmentShader = R"(
-// 	#version 330 core
-// 	out vec4 FragColor;
-	
-// 	in vec4 v_Color;
-// 	in vec2 v_TexCoord;
-// 	in float v_TexIndex;
-
-// 	uniform sampler2D u_Textures[32];
-
-// 	void main()
-// 	{
-// 		int index = int(v_TexIndex);
-// 		if (index==0)
-// 			FragColor = texture(u_Textures[0], v_TexCoord) * v_Color;
-// 		else if (index==1)
-// 			FragColor = texture(u_Textures[1], v_TexCoord) * v_Color;
-// 		else if (index==2)
-// 			FragColor = texture(u_Textures[2], v_TexCoord) * v_Color;
-// 		else if (index==3)
-// 			FragColor = texture(u_Textures[3], v_TexCoord) * v_Color;
-// 	}
-// )";
-
 static const char* fragmentShader = R"(
+	#version 330 core
+	out vec4 FragColor;
+
+	in vec4 v_Color;
+	in vec2 v_TexCoord;
+	in float v_TexIndex;
+
+	uniform sampler2D u_Textures[32];
+
+	void main()
+	{
+		int index = int(v_TexIndex);
+		if (index==0)
+			FragColor = texture(u_Textures[0], v_TexCoord) * v_Color;
+		else if (index==1)
+			FragColor = texture(u_Textures[1], v_TexCoord) * v_Color;
+		else if (index==2)
+			FragColor = texture(u_Textures[2], v_TexCoord) * v_Color;
+		else if (index==3)
+			FragColor = texture(u_Textures[3], v_TexCoord) * v_Color;
+	}
+)";
+
+static const char* sdfFragmentShader = R"(
 	#version 330 core
 	out vec4 FragColor;
 	
@@ -408,7 +408,7 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, F
 	//Find the first open texture slot and insert the texture
 	float textureIndex = 0.0f;
 	for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
-		if (s_Data.TextureSlots[i] == font->atlas->id) {
+		if (s_Data.TextureSlots[i] == font->atlasId) {
 			textureIndex = (float)i;
 			break;
 		}
@@ -416,7 +416,7 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, F
 
 	if (textureIndex == 0.0f) {
 		textureIndex = (float)s_Data.TextureSlotIndex;
-		s_Data.TextureSlots[(int)textureIndex] =  font->atlas->id;
+		s_Data.TextureSlots[(int)textureIndex] =  font->atlasId;
 		s_Data.TextureSlotIndex++;
 	}
 
@@ -439,37 +439,36 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, F
 
 		Vertex* currentVertex = s_Data.QuadBufferPtr;
 
-		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX, position.y + penY, 0) + glm::vec3(0,0, 0);
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX, position.y + penY, 0) + glm::vec3(0,glyph.bearing.y+10, 0);
 		s_Data.QuadBufferPtr->color = color;
-		s_Data.QuadBufferPtr->texCoords = glyph.topLeft;
+		s_Data.QuadBufferPtr->texCoords = glyph.leftTop;
 		s_Data.QuadBufferPtr->texIndex = textureIndex;
 		s_Data.QuadBufferPtr->view = s_Data.currentView;
 		s_Data.QuadBufferPtr++;
 
-		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX + glyph.size.x * scale, penY + position.y, 0) + glm::vec3(0,0, 0);
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX + glyph.size.x * scale, penY + position.y, 0) + glm::vec3(0,glyph.bearing.y+10, 0);
 		s_Data.QuadBufferPtr->color = color;
-		s_Data.QuadBufferPtr->texCoords = glyph.topRight;
+		s_Data.QuadBufferPtr->texCoords = glyph.rightTop;
 		s_Data.QuadBufferPtr->texIndex = textureIndex;
 		s_Data.QuadBufferPtr->view = s_Data.currentView;
 		s_Data.QuadBufferPtr++;
 
-		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX + (glyph.size.x * scale), penY + position.y + glyph.size.y * scale, 0) + glm::vec3(0,0, 0);
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX + (glyph.size.x * scale), penY + position.y + glyph.size.y * scale, 0) + glm::vec3(0,glyph.bearing.y+10, 0);
 		s_Data.QuadBufferPtr->color = color;
-		s_Data.QuadBufferPtr->texCoords = glyph.bottomRight;
+		s_Data.QuadBufferPtr->texCoords = glyph.rightBottom;
 		s_Data.QuadBufferPtr->texIndex = textureIndex;
 		s_Data.QuadBufferPtr->view = s_Data.currentView;
 		s_Data.QuadBufferPtr++;
 
-		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX, penY + position.y + glyph.size.y * scale, 0) + glm::vec3(0,0, 0);
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX, penY + position.y + glyph.size.y * scale, 0) + glm::vec3(0,glyph.bearing.y+10, 0);
 		s_Data.QuadBufferPtr->color = color;
-		s_Data.QuadBufferPtr->texCoords = glyph.bottomLeft;
+		s_Data.QuadBufferPtr->texCoords = glyph.leftBottom;
 		s_Data.QuadBufferPtr->texIndex = textureIndex;
 		s_Data.QuadBufferPtr->view = s_Data.currentView;
 		s_Data.QuadBufferPtr++;
 
 		s_Data.IndexCount += 6;
-
-		penX += 60;
+		penX += glyph.advance * scale;
 
 	}
 }
