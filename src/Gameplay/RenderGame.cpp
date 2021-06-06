@@ -10,6 +10,7 @@ inline int min(int x){
 }
 
 namespace RenderGame {
+    Font* gameBoardFont;
 
     float kMargin = 2.0f;
     float kGaps = 16.0f;
@@ -24,6 +25,7 @@ namespace RenderGame {
     const glm::vec2 kStatsDimensions = glm::vec2{kPieceDimensions.x, kBoardDimensions.y - (kGaps + kPieceDimensions.y)};
 
     const float kProfilePictureSize = 64.0f;
+    const glm::vec2 kPFPDimensions{kProfilePictureSize,kProfilePictureSize};
     const glm::vec2 kIdentityDimensions = glm::vec2{kProfilePictureSize,kProfilePictureSize + kGaps * 2};
     const glm::vec2 kGameDimensions = kBoardDimensions + glm::vec2{kStatsDimensions.x + kGaps*2, kIdentityDimensions.y};
 
@@ -142,11 +144,15 @@ namespace RenderGame {
     }
 
     void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture& texture){
-
+        
+        // Draw Profile Picture
         if (identity.pfp)
-            Renderer::DrawQuad(position, {64,64}, identity.pfp->id);
+            Renderer::DrawQuad(position, kPFPDimensions, identity.pfp->id);
         else
-            Renderer::QuadBox(position, {64,64}, pixelThickness * -1.0f, {1.0f,1,1,1});
+            Renderer::QuadBox(position, kPFPDimensions, pixelThickness * -1.0f, {1.0f,1,1,1});
+
+        // Draw Name
+        Renderer::DrawStr(position + glm::vec2{kPFPDimensions.x + kGaps,0}, 1.5f, identity.name, activeAssets.font);
 
         const glm::vec2 boardPosition = position + glm::vec2{0, kProfilePictureSize + kGaps};
 

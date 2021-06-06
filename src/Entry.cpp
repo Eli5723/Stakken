@@ -1,6 +1,11 @@
 #include "./Entry.h"
 
 #include <GL/gl3w.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_scancode.h>
+#include <SDL2/SDL_stdinc.h>
+#include <SDL2/SDL_video.h>
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -9,11 +14,7 @@
 #include "./Systems/Input/InputBuffer.h"
 #include "./Systems/Input/InputProfile.h"
 
-#include "./Systems/Assets/Sound.h"
-#include "./Systems/Assets/Texture.h"
-#include "./Systems/Assets/BGShader.h"
-#include "./Systems/Assets/LinearTexture.h"
-#include "./Systems/Assets/Font.h"
+#include "./Systems/Assets/Assets.h"
 
 #include "./Systems/Rendering/Renderer.h"
 #include "./Systems/Rendering/ScreenQuad.h"
@@ -25,62 +26,21 @@
 
 const int WINDOW_WIDTH = 1920;
 const int WINDOW_HEIGHT = 1080;
-
-enum class Space {
-    MainGame,
-    OtherGames,
-    Window,
-};
-
 glm::vec2 Resolution{WINDOW_WIDTH,WINDOW_HEIGHT};
-struct View {
-    Space id;
-    
-    glm::vec2 canvasSize;
 
-    glm::vec2 position;
-    float scale;
-    glm::mat4 projection;
-    glm::mat4 transform;
-
-    View (Space id, const glm::vec2& canvasSize){
-        this->id = id;
-        this->canvasSize = canvasSize;
-        projection = glm::ortho(0.0f,canvasSize.x,canvasSize.y,0.0f,-1.0f,1.0f);
-        transform = glm::mat4(1);
-    }
-
-    void Calculate(){
-        scale = fmin(Resolution.x / canvasSize.x, Resolution.y / canvasSize.y   );
-    }
-
-    void Position(const glm::vec2& position){
-        this->position = position;
-        transform = glm::mat4(1);
-        transform = glm::scale(transform,{scale,scale,1.0f});
-        transform = glm::translate(transform,glm::vec3{position.x/scale,position.y/scale,0});
-
-        projection = glm::ortho(0.0f,Resolution.x,Resolution.y,0.0f,-1.0f,1.0f);
-    }
-};
-
-View MainGameView(Space::MainGame,{1280.0f, 720.0f});
-View OtherGameView(Space::OtherGames,{1280.0f*2, 720.0f*2});
-
-// Pointers
-BGShader* BackgroundShader;
-
+const int kTestBoards = 5; 
 
 bool Running = true;
 SDL_Window* window;
 
-// Test variables
-Game* testGame;
-Identity testIdentity{defaultIdentity};
-KeyboardMapper* keyboard;
-Texture* testTexture;
-Font* testFont; 
+struct CientState {
+    Game* game;
+    Identity* identity;
+    InputProfile* inputProfile;
+    KeyboardMapper* keyboard;
+} clientState;
 
+// Init / Entry
 bool OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         return false;
@@ -90,7 +50,7 @@ bool OnInit(){
     gl3wInit();
 
     window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_CreateContext(window);
@@ -102,23 +62,26 @@ bool OnInit(){
     Resolution = glm::vec2{WINDOW_WIDTH,WINDOW_HEIGHT};
     glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
 
-    MainGameView.Calculate();
-    Renderer::Init(MainGameView.projection,MainGameView.transform);
+    Renderer::Init(Resolution);
 
-    OtherGameView.Calculate();
-    OtherGameView.Position({(RenderGame::kGameDimensions.x + RenderGame::kGaps*5) * MainGameView.scale,720.0f - RenderGame::kGameDimensions.y - (float)(RenderGame::kGaps*2)});
-    Renderer::SetView(OtherGameView.projection,OtherGameView.transform,1);
 
     // Initialize Asset Systems
     BGShader::Init();
     ScreenQuad::Init();
-
-    BackgroundShader = new BGShader("./BGShaders/Ocean.frag");
+    activeAssets.bgShader = shaderCache.get(shaderList.files[2]);
+    activeAssets.pieceTexture = textureCache.get(textureList.files[5]);
+    activeAssets.font =  fontCache.get(fontList.files[1]);
 
     // Initialize Audio
     if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,4,2048) < 0){
         SDL_Log("Failed to load audio.");
     }
+
+    // Initialize Client state
+    clientState.game = new Game();
+    clientState.identity = new Identity(defaultIdentity);
+    clientState.inputProfile = new InputProfile;
+    clientState.keyboard = new KeyboardMapper(*clientState.inputProfile);
 
     return true;
 }
@@ -126,18 +89,6 @@ bool OnInit(){
 int OnExecute(){
     if (OnInit() == false)
         return -1;
-
-    
-    // TEST CODE
-    InputProfile testProfile;
-    testProfile.save();
-    keyboard = new KeyboardMapper(testProfile);
-    testTexture = new Texture("./PieceTextures/TGF2.png");
-    testGame = new Game();
-    testIdentity.pfp = new LinearTexture("./Textures/eeli.png");
-
-    testFont = new Font("./Fonts/Lato-Regular");
-
 
     int frameBegin = SDL_GetTicks();
     int frameDelta = 0;
@@ -154,18 +105,18 @@ int OnExecute(){
 
         OnLoop(frameDelta);
         OnRender();
-
-        //SDL_Log("FPS: %f\n",1000.0f / (float)frameDelta);
     }
 
     return 0;
 }
 
+// Main loop
 void OnLoop(int dt){
-    keyboard->update(dt);
-    testGame->ApplyInput(keyboard->buffer);
-    keyboard->buffer.flush();
-    testGame->Update(dt);
+    clientState.keyboard->update(dt);
+    clientState.game->ApplyInput(clientState.keyboard->buffer);
+    clientState.keyboard->buffer.flush();
+    
+    clientState.game->Update(dt);
 }
 
 void OnRender(){
@@ -175,32 +126,11 @@ void OnRender(){
     glClear(GL_COLOR_BUFFER_BIT);
 
     //Draw Background
-    BackgroundShader->draw(&Resolution.x,fTime);
+    activeAssets.bgShader->draw(&Resolution.x,fTime);
 
     // Draw Gameplay
     Renderer::BeginBatch();
-
     Renderer::TargetView(0);
-    Renderer::DrawStr({10,10},1,"abcdef\nghijklmn\nopqrstuvwxyz",testFont);
-
-   // Renderer::DrawQuad({-fTime*200,0},{6729.0f/2.0f,54.0f/2.0f},testFont->atlasId);
-
-    // RenderGame::SetPixelTickness(ceil(1.0f/MainGameView.scale));
-    // RenderGame::DrawGame({RenderGame::kGaps*2                    , 720.0f - RenderGame::kGameDimensions.y - RenderGame::kGaps*2}, *testGame, testIdentity, *testTexture);
-    
-    // Draw other games
-    float otherWidth = (1280.0f-RenderGame::kGameDimensions.x)  / OtherGameView.scale;
-    Renderer::TargetView(1);
-    RenderGame::SetPixelTickness(ceilf(1.0f/OtherGameView.scale));
-
-    const int columns = 2;
-    float columnOffset = floorf(otherWidth/((float)columns+1.0f))*MainGameView.scale;
-    
-    for (int i=0;i<4;i++){
-        int row = i / columns;
-        int column = i % columns;
-        RenderGame::DrawGame({columnOffset * column + floorf(RenderGame::kGameDimensions.x/2), (RenderGame::kGameDimensions.y + RenderGame::kMargin) * row}, *testGame, testIdentity, *testTexture);
-    }
 
     Renderer::EndBatch();
     Renderer::Flush();
@@ -208,6 +138,7 @@ void OnRender(){
     SDL_GL_SwapWindow(window);
 }
 
+// Event Handling
 void OnEvent(SDL_Event& event){
     switch(event.type){
     
@@ -233,29 +164,51 @@ void OnEvent(SDL_Event& event){
 }
 
 void OnInput(SDL_Event& event){
-    switch (event.key.keysym.scancode){
 
-        default:
-        break;
+    // Keyboard Shorcuts
+    if (event.key.keysym.mod & KMOD_ALT) {
+        switch (event.key.keysym.scancode){
+            case SDL_SCANCODE_RETURN: {
+                int fullscreenStatus = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
+                SDL_SetWindowFullscreen(window, fullscreenStatus ? 0 : SDL_WINDOW_FULLSCREEN);
+            } break;
+            
+            // Toggle Borderless
+            case SDL_SCANCODE_B: {
+                int borderStatus = SDL_GetWindowFlags(window) & SDL_WINDOW_BORDERLESS;
+                SDL_SetWindowBordered(window, borderStatus ? SDL_TRUE : SDL_FALSE);
+            } break;
+
+            case SDL_SCANCODE_E: {
+                int flags = SDL_GetWindowFlags(window);
+                if(flags & SDL_WINDOW_FULLSCREEN)         printf("SDL_WINDOW_FULLSCREEN\n");
+                if(flags & SDL_WINDOW_OPENGL)             printf("SDL_WINDOW_OPENGL\n");
+                if(flags & SDL_WINDOW_SHOWN)              printf("SDL_WINDOW_SHOWN\n");
+                if(flags & SDL_WINDOW_HIDDEN)             printf("SDL_WINDOW_HIDDEN\n");
+                if(flags & SDL_WINDOW_BORDERLESS)         printf("SDL_WINDOW_BORDERLESS\n");
+                if(flags & SDL_WINDOW_RESIZABLE)          printf("SDL_WINDOW_RESIZABLE\n");
+                if(flags & SDL_WINDOW_MINIMIZED)          printf("SDL_WINDOW_MINIMIZED\n");
+                if(flags & SDL_WINDOW_MAXIMIZED)          printf("SDL_WINDOW_MAXIMIZED\n");
+                if(flags & SDL_WINDOW_INPUT_GRABBED)      printf("SDL_WINDOW_INPUT_GRABBED\n");
+                if(flags & SDL_WINDOW_INPUT_FOCUS)        printf("SDL_WINDOW_INPUT_FOCUS\n");
+                if(flags & SDL_WINDOW_MOUSE_FOCUS)        printf("SDL_WINDOW_MOUSE_FOCUS\n");
+                if(flags & SDL_WINDOW_FULLSCREEN_DESKTOP) printf("SDL_WINDOW_FULLSCREEN_DESKTOP\n");
+                if(flags & SDL_WINDOW_FOREIGN)            printf("SDL_WINDOW_FOREIGN\n");
+            } break;
+            default:
+            break;
+        }
+        return;
     }
     
-    keyboard->keyEvents(event.key.keysym.scancode);
+    // Game Related Input Events
+    clientState.keyboard->keyEvents(event.key.keysym.scancode);
 }
 
 void OnResize(int width, int height){
     Resolution.x = width;
     Resolution.y = height;
     glViewport(0,0,width,height);
-
-    MainGameView.Calculate();
-    MainGameView.Position({0,0});
-    Renderer::SetView(MainGameView.projection,MainGameView.transform,0);
-
-    OtherGameView.Calculate();
-    OtherGameView.Position({(RenderGame::kGameDimensions.x + RenderGame::kGaps*3) * MainGameView.scale,720.0f - RenderGame::kGameDimensions.y - (float)(RenderGame::kGaps*2)});
-    Renderer::SetView(OtherGameView.projection,OtherGameView.transform,1);
-
-    SDL_Log("Window resized");
 }
 
 void OnCleanup(){

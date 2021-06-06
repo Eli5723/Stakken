@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/fwd.hpp>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -11,8 +12,9 @@
 
 class Renderer {
 public:
-	static void Init(glm::mat4& viewProjection,glm::mat4& viewTransform);
-	static void SetView(glm::mat4& viewProjection,glm::mat4& viewTransform, int offset);
+	static void Init(const glm::vec2& resolution);
+	static void SetResolution(const glm::vec2& resoltion);
+	static void SetView(const glm::vec2& position, float scale, int id);
 	static void TargetView(int target);
 
 	static void Shutdown();

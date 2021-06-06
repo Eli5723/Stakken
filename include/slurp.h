@@ -13,8 +13,9 @@ inline const char* slurpc (const char* path) {
   numbytes = ftell(infile);
   rewind(infile);
 
-  buffer = new char[numbytes];
+  buffer = new char[numbytes+1];
   fread(buffer,1,numbytes,infile);
+  buffer[numbytes] = 0;
   return buffer;
 }
 
@@ -29,7 +30,8 @@ inline const unsigned char* slurpuc (const char* path) {
   numbytes = ftell(infile);
   rewind(infile);
 
-  buffer = new unsigned char[numbytes];
+  buffer = new unsigned char[numbytes+1];
   fread(buffer,1,numbytes,infile);
+  buffer[numbytes] = 0;
   return buffer;
 }

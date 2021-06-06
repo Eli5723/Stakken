@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL2/SDL_log.h>
 #include <stb_truetype.h>
 #include <slurp.h>
 #include <GL/gl3w.h>
@@ -47,7 +48,7 @@ struct Font {
     // Generates an atlas for a font if one has not been saved yet
     void GenerateAtlas(const std::string& path){
        
-        unsigned const char* fontFile = slurpuc((path + ".ttf").c_str());
+        unsigned const char* fontFile = slurpuc(path.c_str());
 
         static stbtt_fontinfo* fontInfo = new stbtt_fontinfo;
         stbtt_InitFont(fontInfo, fontFile,0);
@@ -57,12 +58,17 @@ struct Font {
         int totalWidth = 0;
         int maxHeight = 0;
         int x0,y0,x1,y1, width, height;
-        for (int charCode = 0; charCode < 256; charCode++){
+        for (int charCode = 0; charCode < 255; charCode++){
             stbtt_GetCodepointBitmapBox(fontInfo, charCode, scale, scale, &x0, &y0, &x1, &y1);
             width = x1-x0;
             height = y1-y0;
             totalWidth += width;
             maxHeight = maxHeight > height ? maxHeight : height;
+        }
+
+        if (totalWidth == 0 || maxHeight == 0) {
+            SDL_LogWarn(SDL_LOG_CATEGORY_INPUT, "Failed to laod font: %s", path.c_str());
+            return;
         }
 
         // Allocate atlas Bitmap
@@ -71,7 +77,7 @@ struct Font {
         // TODO: Improve packing algorthim
         int penX = 0;
         int offsetX, offsetY, advanceWidth, leftSideBearing;
-        for (int charCode = 0; charCode < 256; charCode++){
+        for (int charCode = 0; charCode < 255; charCode++){
             // Add Glyph to bitmap
             u8* bitmap = stbtt_GetCodepointBitmap(fontInfo, scale, scale, charCode, &width, &height, &offsetX, &offsetY);
             stamp(atlasBitmap,bitmap,penX,0,width,height,totalWidth);
@@ -90,7 +96,7 @@ struct Font {
 
 
             penX+= width;
-            //stbtt_FreeBitmap(bitmap,0);
+            stbtt_FreeBitmap(bitmap,0);
         }        
 
         // Calculate font vertical metrics

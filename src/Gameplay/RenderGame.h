@@ -7,7 +7,7 @@
 #include "./Game.h"
 
 #include "../Systems/Identity.h"
-#include "../Systems/Assets/Texture.h"
+#include "../Systems/Assets/Assets.h"
 
 namespace RenderGame {
     void SetPixelTickness(float thickness);
@@ -26,7 +26,6 @@ namespace RenderGame {
     extern float kMargin;
     extern float kGaps;
     extern const glm::vec2 kMarginDimensions;
-
 
     void SetPixelTickness(float thickness);
 
