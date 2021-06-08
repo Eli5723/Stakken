@@ -71,6 +71,16 @@ struct Font {
             return;
         }
 
+        // Calculate font vertical metrics
+        int ascent, descent, lineGap;
+        stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
+        this->ascent = (float)ascent * scale;
+        this->descent = (float)descent * scale;
+        this->lineGap = (float)lineGap * scale;
+        this->lineHeight = (float)(ascent - descent + lineGap) * scale;
+
+
+
         // Allocate atlas Bitmap
         u8* atlasBitmap = new u8[totalWidth * maxHeight];
 
@@ -98,14 +108,6 @@ struct Font {
             penX+= width;
             stbtt_FreeBitmap(bitmap,0);
         }        
-
-        // Calculate font vertical metrics
-        int ascent, descent, lineGap;
-        stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
-        this->ascent = (float)ascent * scale;
-        this->descent = (float)descent * scale;
-        this->lineGap = (float)lineGap * scale;
-        this->lineHeight = (float)(ascent - descent + lineGap) * scale;
 
         glGenTextures(1, &atlasId);
         glBindTexture(GL_TEXTURE_2D, atlasId);

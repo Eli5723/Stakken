@@ -126,11 +126,14 @@ void Renderer::Init(const glm::vec2& resolution) {
 	s_Data.quadShader->fillSamplers();
 	s_Data.currentView = 0;
 
+	glm::mat4 projection = glm::ortho(0.0f, resolution.x, resolution.y, 0.0f);
+	s_Data.quadShader->setMat4("u_projection", projection);
+
 	glm::mat4 transform = glm::mat4(1.0f);
-	s_Data.quadShader->setMat4Offset("u_projection", transform,0);
-	s_Data.quadShader->setMat4Offset("u_projection", transform,1);
-	s_Data.quadShader->setMat4Offset("u_projection", transform,2);
-	s_Data.quadShader->setMat4Offset("u_projection", transform,3);
+	s_Data.quadShader->setMat4Offset("u_transform[0]", transform,0);
+	s_Data.quadShader->setMat4Offset("u_transform[0]", transform,1);
+	s_Data.quadShader->setMat4Offset("u_transform[0]", transform,2);
+	s_Data.quadShader->setMat4Offset("u_transform[0]", transform,3);
 
 	s_Data.QuadBuffer = new Vertex[MaxVertexCount];
 	

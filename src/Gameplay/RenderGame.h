@@ -12,10 +12,6 @@
 namespace RenderGame {
     void SetPixelTickness(float thickness);
 
-    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture);
-    void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture& texture);
-    void DrawGame(const glm::vec2& position, Game& game,float thickness, Identity& identity, Texture& texture);
-
     extern const float kTileSize;
 
     extern const glm::vec2 kTileDimensions; // 16 x 16

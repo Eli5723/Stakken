@@ -15,7 +15,7 @@ namespace RenderGame {
     float kMargin = 2.0f;
     float kGaps = 16.0f;
 
-    const float kTileSize = 32.0f;
+    const float kTileSize = 30.0f;
 
     const glm::vec2 kTileDimensions{kTileSize, kTileSize}; // 16 x 16
     const glm::vec2 kPieceDimensions{kTileSize * 4, kTileSize * 4}; // 64 x 64
@@ -145,6 +145,8 @@ namespace RenderGame {
 
     void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture& texture){
         
+        Renderer::QuadBox(position,kGameDimensions,1.0f,{1,1,1,1});
+
         // Draw Profile Picture
         if (identity.pfp)
             Renderer::DrawQuad(position, kPFPDimensions, identity.pfp->id);

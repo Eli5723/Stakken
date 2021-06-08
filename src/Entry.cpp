@@ -1,4 +1,9 @@
 #include "./Entry.h"
+#include "Systems/Assets/LinearTexture.h"
+
+#include <SDL2/SDL_events.h>
+#include <vector>
+using std::vector;
 
 #include <GL/gl3w.h>
 #include <SDL2/SDL_keycode.h>
@@ -24,11 +29,11 @@
 #include "./Gameplay/Game.h"
 #include "./Gameplay/RenderGame.h"
 
-const int WINDOW_WIDTH = 1920;
-const int WINDOW_HEIGHT = 1080;
-glm::vec2 Resolution{WINDOW_WIDTH,WINDOW_HEIGHT};
+#include "./Systems/UI/Widgets.h"
 
-const int kTestBoards = 5; 
+const int WINDOW_WIDTH = 1280;
+const int WINDOW_HEIGHT = 720;
+glm::vec2 Resolution{WINDOW_WIDTH,WINDOW_HEIGHT};
 
 bool Running = true;
 SDL_Window* window;
@@ -38,10 +43,14 @@ struct CientState {
     Identity* identity;
     InputProfile* inputProfile;
     KeyboardMapper* keyboard;
+
+    vector<Game*> otherGames;
+    vector<Identity*> otherPlayers;
 } clientState;
 
 // Init / Entry
-bool OnInit(){
+bool 
+OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         return false;
     }
@@ -64,11 +73,22 @@ bool OnInit(){
 
     Renderer::Init(Resolution);
 
+    UI::Init(Resolution);
+
+    UI::Element* button = UI::Button([](int x, int y){clientState.game->board->clear();}, "Clear");
+    button->position = {20,20};
+    button->size = {200,20};
+    UI::addToScreen(button);
+
+    UI::Element* play = UI::Button([](int x, int y){printf("Clicked at: %i,%i\n", x, y);}, "Play");
+    play->position = {20,80};
+    play->size = {200,20};
+    UI::addToScreen(play);
 
     // Initialize Asset Systems
     BGShader::Init();
     ScreenQuad::Init();
-    activeAssets.bgShader = shaderCache.get(shaderList.files[2]);
+    activeAssets.bgShader = shaderCache.get(shaderList.files[1]);
     activeAssets.pieceTexture = textureCache.get(textureList.files[5]);
     activeAssets.font =  fontCache.get(fontList.files[1]);
 
@@ -80,13 +100,15 @@ bool OnInit(){
     // Initialize Client state
     clientState.game = new Game();
     clientState.identity = new Identity(defaultIdentity);
+    clientState.identity->pfp = new LinearTexture("./Resources/Textures/eeli.png");
     clientState.inputProfile = new InputProfile;
     clientState.keyboard = new KeyboardMapper(*clientState.inputProfile);
 
     return true;
 }
 
-int OnExecute(){
+int 
+OnExecute(){
     if (OnInit() == false)
         return -1;
 
@@ -111,7 +133,8 @@ int OnExecute(){
 }
 
 // Main loop
-void OnLoop(int dt){
+void 
+OnLoop(int dt){
     clientState.keyboard->update(dt);
     clientState.game->ApplyInput(clientState.keyboard->buffer);
     clientState.keyboard->buffer.flush();
@@ -119,7 +142,8 @@ void OnLoop(int dt){
     clientState.game->Update(dt);
 }
 
-void OnRender(){
+void 
+OnRender(){
     float fTime = (float)SDL_GetTicks()/1000.0f; 
 
     glClearColor(0,0,0,1);
@@ -132,6 +156,9 @@ void OnRender(){
     Renderer::BeginBatch();
     Renderer::TargetView(0);
 
+    UI::Render();
+    RenderGame::DrawGame(glm::vec2(300,300),*clientState.game,*clientState.identity,*activeAssets.pieceTexture);
+
     Renderer::EndBatch();
     Renderer::Flush();
 
@@ -139,7 +166,8 @@ void OnRender(){
 }
 
 // Event Handling
-void OnEvent(SDL_Event& event){
+void 
+OnEvent(const SDL_Event& event){
     switch(event.type){
     
     case SDL_QUIT:
@@ -158,12 +186,17 @@ void OnEvent(SDL_Event& event){
         OnInput(event);
     break;
 
+    case SDL_MOUSEBUTTONDOWN:
+        OnClick(event);
+    break;
+
     default:
     break;
     }
 }
 
-void OnInput(SDL_Event& event){
+void 
+OnInput(const SDL_Event& event){
 
     // Keyboard Shorcuts
     if (event.key.keysym.mod & KMOD_ALT) {
@@ -195,6 +228,7 @@ void OnInput(SDL_Event& event){
                 if(flags & SDL_WINDOW_FULLSCREEN_DESKTOP) printf("SDL_WINDOW_FULLSCREEN_DESKTOP\n");
                 if(flags & SDL_WINDOW_FOREIGN)            printf("SDL_WINDOW_FOREIGN\n");
             } break;
+
             default:
             break;
         }
@@ -205,10 +239,19 @@ void OnInput(SDL_Event& event){
     clientState.keyboard->keyEvents(event.key.keysym.scancode);
 }
 
-void OnResize(int width, int height){
+void
+OnClick(const SDL_Event& event){
+    UI::click(event.button.x,event.button.y);
+}
+
+void 
+OnResize(int width, int height){
     Resolution.x = width;
     Resolution.y = height;
     glViewport(0,0,width,height);
+    Renderer::SetResolution({width,height});
+
+    UI::Resize(Resolution);
 }
 
 void OnCleanup(){

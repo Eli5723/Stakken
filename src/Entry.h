@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 
 
 
@@ -11,8 +12,10 @@ void OnRender();
 void OnCleanup();
 
 // Event Handling
-void OnEvent(SDL_Event& Event);
+void OnEvent(const SDL_Event& Event);
 
-void OnInput(SDL_Event& event);
+void OnInput(const SDL_Event& event);
 
 void OnResize(int width, int height);
+
+void OnClick(const SDL_Event& event);
