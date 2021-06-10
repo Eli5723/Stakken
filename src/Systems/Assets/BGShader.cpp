@@ -38,7 +38,8 @@ void BGShader::Init(){
 using std::string;
 
 BGShader::BGShader(const string& path) {
-
+	this->path = path;
+	
 	//Read in background shader source
 	using BufIt = std::istreambuf_iterator<char>;
 	std::ifstream in(path);

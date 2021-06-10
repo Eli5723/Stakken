@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL2/SDL_log.h>
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -77,7 +78,7 @@ class AssetCache {
 
 	public:
 	//Load file if it hasn't been loaded already, otherwise return the cached item
-	type* get(string& path) {
+	type* get(const string& path) {
 
 		auto iter = loadedFiles.find(path);
 
@@ -91,7 +92,8 @@ class AssetCache {
 		} else {
 			return iter->second;
 		}
-
+		
+		return nullptr;
 	}
 };
 

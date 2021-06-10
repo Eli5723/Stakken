@@ -5,7 +5,7 @@ const ExtensionList SoundExtensions = { ".wav",".mp3",".ogg" };
 const ExtensionList ShaderExtensions = { ".frag" };
 const ExtensionList FontExtensions = { ".ttf" };
 
-ResourceList textureList(ImageExtensions, "./Resources/Textures", "Block Textures");
+ResourceList textureList(ImageExtensions, "./Resources/PieceTextures", "Piecee Textures");
 ResourceList soundList(SoundExtensions, "./Resources/Sounds", "Sounds");
 ResourceList fontList(FontExtensions, "./Resources/Fonts", "Fonts");
 ResourceList shaderList(ShaderExtensions, "./Resources/BGShaders", "Background Shaders");

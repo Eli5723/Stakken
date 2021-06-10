@@ -145,8 +145,6 @@ namespace RenderGame {
 
     void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture& texture){
         
-        Renderer::QuadBox(position,kGameDimensions,1.0f,{1,1,1,1});
-
         // Draw Profile Picture
         if (identity.pfp)
             Renderer::DrawQuad(position, kPFPDimensions, identity.pfp->id);
@@ -154,6 +152,7 @@ namespace RenderGame {
             Renderer::QuadBox(position, kPFPDimensions, pixelThickness * -1.0f, {1.0f,1,1,1});
 
         // Draw Name
+        Renderer::DrawQuad(position + glm::vec2{kPFPDimensions.x + kGaps*.5,0},{200.0f,64.0f},{0.0f,0.0f,0.0f,0.5f});
         Renderer::DrawStr(position + glm::vec2{kPFPDimensions.x + kGaps,0}, 1.5f, identity.name, activeAssets.font);
 
         const glm::vec2 boardPosition = position + glm::vec2{0, kProfilePictureSize + kGaps};

@@ -1,5 +1,7 @@
-#include "Widgets.h"
+#include "./UI.h"
+
 #include "../Assets/Assets.h"
+#include <SDL2/SDL_events.h>
 
 namespace UI {
 
@@ -18,7 +20,7 @@ namespace UI {
         s_Data.screen->size = resolution;
     }
 
-    void addToScreen(Element* element){
+    void addToScreen(Element *element){
         s_Data.screen->addChild(element);
     }
 
@@ -49,15 +51,35 @@ namespace UI {
         s_Data.focus = clicked;
     }
 
+    // Try key capture on focused item
+    bool keyCapture(const SDL_KeyboardEvent& event){
+        if (s_Data.focus && s_Data.focus->keyCallback) {
+            s_Data.focus->keyCallback(event);
+            return true;
+        }
+        return false;
+    }
+
+    void clearFocus(){
+        s_Data.focus = 0;
+    }
+
     // Recursively render widgets
     void Render(Element* root){
         Element* node = root->children;
         while (node != nullptr){
-            Renderer::DrawQuad(root->position + node->position,node->size, {0,0,0,0});
-            Renderer::QuadBox(root->position + node->position,node->size,1.0f, {1,1,1,1});
+            if (node->flags & Flags::background)
+                Renderer::DrawQuad(root->position + node->position,node->size, {0,0,0,1});
+
+            if (node->flags & Flags::border)
+                Renderer::QuadBox(root->position + node->position,node->size,1.0f, {1,1,1,1});
 
             if (node->flags & Flags::text)
                 Renderer::DrawStr(root->position + node->position, 0.5f, node->data.text,activeAssets.font);
+            else if (node->flags & Flags::texture){
+                Renderer::DrawQuad(root->position + node->position,node->size, node->data.texture->id);
+            }
+
             Render(node);
             node = node->next;
         }
@@ -65,13 +87,5 @@ namespace UI {
 
     void Render(){
         Render(s_Data.screen);
-    }
-
-    Element* Button(const ClickCallback& callback, const char* text){
-        Element* button = new Element;
-        button->clickCallback = callback;
-        button->data.text = text;
-        button->flags = Flags::text;
-        return button;
     }
 }

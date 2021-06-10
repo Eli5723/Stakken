@@ -1,26 +1,32 @@
 #pragma once
 
+#include <SDL2/SDL_events.h>
+#include <functional>
+
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 
+#include <SDL2/SDL.h>
 #include <estdint.h>
 
 #include "../Rendering/Renderer.h"
 #include "../Assets/Texture.h"
 
 namespace UI {
-
     typedef void (*ClickCallback)(int, int);
     typedef void (*MouseOver)();
 
     enum Flags {
         none = 0,
-        text = 1,
-        texture = 1 << 1
+        border = 1,
+        background = 1 << 1,
+        text = 1 << 2,
+        texture = 1 << 3
     };
 
     union ElementData {
-        const char* text;
+        char* text;
+        Texture* texture;
     };
 
     struct Element {
@@ -31,10 +37,13 @@ namespace UI {
         glm::vec2 position = {0,0};
         glm::vec2 size = {0,0};
 
-        ClickCallback clickCallback;
+        //ClickCallback clickCallback = nullptr;
+
+        std::function<void(int,int)> clickCallback;
+        std::function<void(const SDL_KeyboardEvent&)> keyCallback;
 
         int flags = 0;
-        ElementData data;
+        ElementData data{0};
 
         void addChild(Element* toAdd){
             toAdd->parent = this;
@@ -44,6 +53,18 @@ namespace UI {
             } else {
                 last()->next = toAdd;
             }
+        }
+
+        // Data assignment functions
+        void setText(const char* source){
+            flags = Flags::text;
+            if (data.text)
+                delete [] data.text;
+
+            int len  = std::strlen(source);
+            data.text = new char[len+1];
+            std::strncpy(data.text, source, len);
+            data.text[len] = 0;
         }
 
         // Precondition: 1 node
@@ -56,20 +77,4 @@ namespace UI {
             return child;
         }
     };
-
-    // UI driver functions
-    void Init(const glm::vec2& resolution);
-    void Resize(const glm::vec2& resolution);
-    void addToScreen(Element* element);
-
-    // Recursively propogate clicks
-    Element* click(Element* root, int x, int y);
-
-    void click(int x, int y);
-    // Recursively render widgets
-    void Render(Element* root);
-    void Render();
-
-
-    Element* Button(const ClickCallback& callback, const char* text);
 }

@@ -1,4 +1,5 @@
 #include "./Entry.h"
+#include "Systems/Assets/BGShader.h"
 #include "Systems/Assets/LinearTexture.h"
 
 #include <SDL2/SDL_events.h>
@@ -29,7 +30,10 @@ using std::vector;
 #include "./Gameplay/Game.h"
 #include "./Gameplay/RenderGame.h"
 
-#include "./Systems/UI/Widgets.h"
+#include "./Systems/UI/UI.h"
+#include "./Systems/UI/Options.h"
+
+#include <cstdio>
 
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
@@ -46,6 +50,9 @@ struct CientState {
 
     vector<Game*> otherGames;
     vector<Identity*> otherPlayers;
+
+    int currentBGShader = 0;
+    int currentTexture = 0;
 } clientState;
 
 // Init / Entry
@@ -75,20 +82,10 @@ OnInit(){
 
     UI::Init(Resolution);
 
-    UI::Element* button = UI::Button([](int x, int y){clientState.game->board->clear();}, "Clear");
-    button->position = {20,20};
-    button->size = {200,20};
-    UI::addToScreen(button);
-
-    UI::Element* play = UI::Button([](int x, int y){printf("Clicked at: %i,%i\n", x, y);}, "Play");
-    play->position = {20,80};
-    play->size = {200,20};
-    UI::addToScreen(play);
-
     // Initialize Asset Systems
     BGShader::Init();
     ScreenQuad::Init();
-    activeAssets.bgShader = shaderCache.get(shaderList.files[1]);
+    activeAssets.bgShader = shaderCache.get(shaderList.files[clientState.currentBGShader%shaderList.files.size()]);
     activeAssets.pieceTexture = textureCache.get(textureList.files[5]);
     activeAssets.font =  fontCache.get(fontList.files[1]);
 
@@ -103,6 +100,11 @@ OnInit(){
     clientState.identity->pfp = new LinearTexture("./Resources/Textures/eeli.png");
     clientState.inputProfile = new InputProfile;
     clientState.keyboard = new KeyboardMapper(*clientState.inputProfile);
+
+    UI::Element* inputOptions = UI::InputOptions(clientState.inputProfile);
+    inputOptions->position = {600,32};
+    UI::addToScreen(inputOptions);
+
 
     return true;
 }
@@ -126,7 +128,7 @@ OnExecute(){
         }
 
         OnLoop(frameDelta);
-        OnRender();
+        OnRender(frameDelta);
     }
 
     return 0;
@@ -143,7 +145,7 @@ OnLoop(int dt){
 }
 
 void 
-OnRender(){
+OnRender(int dt){
     float fTime = (float)SDL_GetTicks()/1000.0f; 
 
     glClearColor(0,0,0,1);
@@ -156,8 +158,9 @@ OnRender(){
     Renderer::BeginBatch();
     Renderer::TargetView(0);
 
+    RenderGame::DrawGame({RenderGame::kGaps,64.0f},*clientState.game,*clientState.identity,*activeAssets.pieceTexture);
+
     UI::Render();
-    RenderGame::DrawGame(glm::vec2(300,300),*clientState.game,*clientState.identity,*activeAssets.pieceTexture);
 
     Renderer::EndBatch();
     Renderer::Flush();
@@ -183,7 +186,7 @@ OnEvent(const SDL_Event& event){
     }
 
     case SDL_KEYDOWN:
-        OnInput(event);
+        OnInput(event.key);
     break;
 
     case SDL_MOUSEBUTTONDOWN:
@@ -196,11 +199,11 @@ OnEvent(const SDL_Event& event){
 }
 
 void 
-OnInput(const SDL_Event& event){
+OnInput(const SDL_KeyboardEvent& key){
 
     // Keyboard Shorcuts
-    if (event.key.keysym.mod & KMOD_ALT) {
-        switch (event.key.keysym.scancode){
+    if (key.keysym.mod & KMOD_ALT) {
+        switch (key.keysym.scancode){
             case SDL_SCANCODE_RETURN: {
                 int fullscreenStatus = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
                 SDL_SetWindowFullscreen(window, fullscreenStatus ? 0 : SDL_WINDOW_FULLSCREEN);
@@ -234,9 +237,13 @@ OnInput(const SDL_Event& event){
         }
         return;
     }
+
+    // Allow the UI to capture input
+    if (UI::keyCapture(key))
+        return;
     
-    // Game Related Input Events
-    clientState.keyboard->keyEvents(event.key.keysym.scancode);
+    // Send input to the board
+    clientState.keyboard->keyEvents(key.keysym.scancode);
 }
 
 void

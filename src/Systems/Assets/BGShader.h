@@ -3,8 +3,10 @@
 #include <GL/gl3w.h>
 #include <string>
 
+#
 class BGShader {
     public:
+        std::string path;
         static void Init();
 
         GLuint ID;

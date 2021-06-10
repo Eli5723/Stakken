@@ -4,10 +4,12 @@
 
 #include <filesystem>
 
-Sound::Sound(const std::string& location){
-    chunk = Mix_LoadWAV(location.c_str());
+Sound::Sound(const std::string& path){
+    this->path = path;
+
+    chunk = Mix_LoadWAV(path.c_str());
     if (!chunk){
-        SDL_Log("Failed to load sound at %s", location.c_str());
+        SDL_Log("Failed to load sound at %s", path.c_str());
     }
 }
 

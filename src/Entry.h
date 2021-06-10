@@ -4,17 +4,16 @@
 #include <SDL2/SDL_events.h>
 
 
-
 int OnExecute();
 bool OnInit();
 void OnLoop(int dt);
-void OnRender();
+void OnRender(int dt);
 void OnCleanup();
 
 // Event Handling
 void OnEvent(const SDL_Event& Event);
 
-void OnInput(const SDL_Event& event);
+void OnInput(const SDL_KeyboardEvent& key);
 
 void OnResize(int width, int height);
 
