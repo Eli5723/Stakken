@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./Element.h"
+#include <SDL2/SDL_events.h>
 
 namespace UI {
 
@@ -14,6 +15,7 @@ namespace UI {
     Element* click(Element* root, int x, int y);
     void click(int x, int y);
     bool keyCapture(const SDL_KeyboardEvent& event);
+    void inputCapture(const SDL_TextInputEvent& event);
     void clearFocus();
 
     // Recursively render widgets

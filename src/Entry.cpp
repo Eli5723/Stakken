@@ -97,14 +97,25 @@ OnInit(){
     // Initialize Client state
     clientState.game = new Game();
     clientState.identity = new Identity(defaultIdentity);
-    clientState.identity->pfp = new LinearTexture("./Resources/Textures/eeli.png");
+    clientState.identity->pfp = new LinearTexture("./Resources/Textures/pfp/fuu.png");
     clientState.inputProfile = new InputProfile;
     clientState.keyboard = new KeyboardMapper(*clientState.inputProfile);
 
-    UI::Element* inputOptions = UI::InputOptions(clientState.inputProfile);
-    inputOptions->position = {600,32};
+
+    // Create input options
+    UI::Element* inputOptions = UI::Options(clientState.inputProfile, clientState.identity);
+    inputOptions->position = {500,32};
     UI::addToScreen(inputOptions);
 
+    // Create resource options
+    UI::Element* shaderOptions = new UI::Element;
+    shaderOptions->flags = UI::Flags::text | UI::Flags::background;
+    shaderOptions->data.text = "Shader";
+    shaderOptions->size = {100.0f,32.0f};
+    shaderOptions->clickCallback = [](int x, int y){
+        activeAssets.bgShader = shaderCache.get(shaderList.files[++clientState.currentBGShader%shaderList.files.size()]);
+    };
+    UI::addToScreen(shaderOptions);
 
     return true;
 }
@@ -193,6 +204,9 @@ OnEvent(const SDL_Event& event){
         OnClick(event);
     break;
 
+    case SDL_TEXTINPUT:
+        OnTextInput(event.text);
+    break;
     default:
     break;
     }
@@ -249,6 +263,11 @@ OnInput(const SDL_KeyboardEvent& key){
 void
 OnClick(const SDL_Event& event){
     UI::click(event.button.x,event.button.y);
+}
+
+void
+OnTextInput(const SDL_TextInputEvent& input){
+    UI::inputCapture(input);
 }
 
 void 

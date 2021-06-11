@@ -7,4 +7,6 @@
 namespace UI {
     Element* Button(const ClickCallback& callback, Texture* texture);
     Element* Label(const char* text);
+    Element* TextInput();
+    Element* NumberInput(int &target);
 }

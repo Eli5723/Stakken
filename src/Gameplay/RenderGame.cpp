@@ -4,6 +4,7 @@
 
 #include "../Systems/Rendering/Renderer.h"
 #include "../Systems/Assets/Texture.h"
+#include "PieceDefinitions.h"
 
 inline int min(int x){
     return (x > 0 ? x : 0);
@@ -56,6 +57,34 @@ namespace RenderGame {
                     if ((connections & Side::Right) ^ Side::Right)
                         Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize-1,0},glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
 
+                }
+            }
+        }
+    }
+
+    // Draw a piece without having a piece object; used to draw pieces in the options menu
+    void DrawPiece(const glm::vec2& position, ColorTable* colorTable, Texture& texture, int type, int rotation){
+        Tile* tiles = PieceDefintions::getPieceTiles(type, rotation);
+        Connection* connections = PieceDefintions::getPieceConnections(type, rotation);
+
+        for (int y = 0; y < 4; y++){
+            for (int x = 0; x < 4; x++){
+                if (tiles[x + y * 4] != TileType::Empty){
+                    glm::vec2 tilePosition = position + glm::vec2{kTileSize * x, kTileSize * y};
+                    Renderer::DrawQuad(tilePosition, kTileDimensions, texture.id, colorTable->entries[type]);
+
+                    const Connection connection = connections[x + y * 4];
+                    if ((connection & Side::Up) ^ Side::Up)
+                        Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize,pixelThickness},{1,1,1,1});
+                    
+                    if ((connection & Side::Down) ^ Side::Down)
+                        Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize-1},glm::vec2{kTileSize,pixelThickness},{1,1,1,1});
+
+                    if ((connection & Side::Left) ^ Side::Left)
+                        Renderer::DrawQuad(tilePosition,glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
+
+                    if ((connection & Side::Right) ^ Side::Right)
+                        Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize-1,0},glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
                 }
             }
         }

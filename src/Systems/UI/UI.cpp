@@ -60,32 +60,42 @@ namespace UI {
         return false;
     }
 
+    void inputCapture(const SDL_TextInputEvent& event){
+        if (s_Data.focus && s_Data.focus->textCallback)
+            s_Data.focus->textCallback(event);
+    }
+
     void clearFocus(){
         s_Data.focus = 0;
     }
 
     // Recursively render widgets
-    void Render(Element* root){
+    void Render(Element* root,glm::vec2 baseOffset){
         Element* node = root->children;
         while (node != nullptr){
+            const glm::vec2 offset = baseOffset + node->position;
+
             if (node->flags & Flags::background)
-                Renderer::DrawQuad(root->position + node->position,node->size, {0,0,0,1});
+                Renderer::DrawQuad(offset ,node->size, {0,0,0,1});
 
             if (node->flags & Flags::border)
-                Renderer::QuadBox(root->position + node->position,node->size,1.0f, {1,1,1,1});
+                Renderer::QuadBox(offset ,node->size,1.0f, {1,1,1,1});
 
             if (node->flags & Flags::text)
-                Renderer::DrawStr(root->position + node->position, 0.5f, node->data.text,activeAssets.font);
-            else if (node->flags & Flags::texture){
-                Renderer::DrawQuad(root->position + node->position,node->size, node->data.texture->id);
-            }
+                Renderer::DrawStr(offset , 0.5f, node->data.text,activeAssets.font);
+            
+            if (node->flags & Flags::texture)
+                Renderer::DrawQuad(offset ,node->size, node->data.texture->id);
+            
+            if (node->flags & Flags::piece)
+                RenderGame::DrawPiece(offset, node->data.piece.colorTable, *activeAssets.pieceTexture, node->data.piece.type, node->data.piece.rotation);
 
-            Render(node);
+            Render(node,baseOffset + node->position);
             node = node->next;
         }
     }
 
     void Render(){
-        Render(s_Data.screen);
+        Render(s_Data.screen,{0,0});
     }
 }

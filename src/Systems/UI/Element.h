@@ -11,6 +11,7 @@
 
 #include "../Rendering/Renderer.h"
 #include "../Assets/Texture.h"
+#include "../../Gameplay/RenderGame.h"
 
 namespace UI {
     typedef void (*ClickCallback)(int, int);
@@ -21,12 +22,18 @@ namespace UI {
         border = 1,
         background = 1 << 1,
         text = 1 << 2,
-        texture = 1 << 3
+        texture = 1 << 3,
+        piece = 1 << 4
     };
 
     union ElementData {
         char* text;
         Texture* texture;
+        struct Piece {
+            TileType type;
+            int rotation;
+            ColorTable* colorTable;
+        } piece;
     };
 
     struct Element {
@@ -41,6 +48,7 @@ namespace UI {
 
         std::function<void(int,int)> clickCallback;
         std::function<void(const SDL_KeyboardEvent&)> keyCallback;
+        std::function<void(const SDL_TextInputEvent&)> textCallback;
 
         int flags = 0;
         ElementData data{0};

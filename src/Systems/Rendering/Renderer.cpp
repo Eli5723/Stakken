@@ -470,7 +470,8 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, F
 
 	//Queue a quad for each 
 
-	float penX = 0;
+	const float kMargin = 4.0f;
+	float penX = kMargin;
 	float penY = font->lineHeight * scale;
 
 	for (unsigned int i = 0; i < str.length(); i++) {
@@ -478,7 +479,7 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, F
 		char charCode = str[i];
 
 		if (charCode == '\n') {
-			penX = 0;
+			penX = kMargin;
 			penY += font->lineHeight * scale;
 			continue;
 		}

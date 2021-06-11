@@ -18,3 +18,5 @@ void OnInput(const SDL_KeyboardEvent& key);
 void OnResize(int width, int height);
 
 void OnClick(const SDL_Event& event);
+
+void OnTextInput(const SDL_TextInputEvent&);
