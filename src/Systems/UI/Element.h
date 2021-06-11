@@ -49,6 +49,7 @@ namespace UI {
         std::function<void(int,int)> clickCallback;
         std::function<void(const SDL_KeyboardEvent&)> keyCallback;
         std::function<void(const SDL_TextInputEvent&)> textCallback;
+        std::function<void(const SDL_MouseMotionEvent&)> moveCallback;
 
         int flags = 0;
         ElementData data{0};

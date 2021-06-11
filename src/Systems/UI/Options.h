@@ -138,19 +138,55 @@ Element* Options(InputProfile* profile, Identity* identity){
         pieceRoot->addChild(piece);
 
         // Paint Bucket (Drag to modify HSV)
-        Element* paintBucket = new Element;
-        paintBucket->flags = Flags::texture;
-        paintBucket->data.texture = textureCache.get("./Resources/Textures/Icons/paint-bucket.png");
-        paintBucket->position = position + glm::vec2{0,RenderGame::kPieceDimensions.y+1};
-        paintBucket->size= {32.0f,32.0f};
-        paintBucket->clickCallback = [i,identity](int x, int y){
+        static float hue[7];
+        static float saturation[7];
+        static float value[7];
+        // Extract HSV information from the profile's color tables
+        RGB2HSV(hue[i], saturation[i], value[i], identity->color_table.entries[i]);
+        
+        Element* h = new Element;
+        h->flags = Flags::texture;
+        h->data.texture = textureCache.get("./Resources/Textures/Icons/hue.png");
+        h->position = position + glm::vec2{0,RenderGame::kPieceDimensions.y+1};
+        h->size= {32.0f,32.0f};
+        h->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
             //Initializes a static float for each color table entry to the hue of that entry
-            static float hue[7]{RGB2H(identity->color_table.entries[0]),RGB2H(identity->color_table.entries[1]),RGB2H(identity->color_table.entries[2]),RGB2H(identity->color_table.entries[3]),RGB2H(identity->color_table.entries[4]),RGB2H(identity->color_table.entries[5]),RGB2H(identity->color_table.entries[6])};
-            hue[i] += 5;
-            H2RGB(hue[i], identity->color_table.entries[i]);
+            hue[i] = hue[i] + event.yrel*2;
+
+            HSV2RGB(hue[i],saturation[i],value[i], identity->color_table.entries[i]);
         };
 
-        pieceRoot->addChild(paintBucket);
+        printf("H S V : %d, %f, %f, %f,\n",i,hue[i], saturation[i],value[i]);
+
+        pieceRoot->addChild(h);
+
+        Element* s = new Element;
+        s->flags = Flags::texture;
+        s->data.texture = textureCache.get("./Resources/Textures/Icons/saturation.png");
+        s->position = position + glm::vec2{32.0f,RenderGame::kPieceDimensions.y+1};
+        s->size= {32.0f,32.0f};
+        s->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
+            //Initializes a static float for each color table entry to the hue of that entry
+            saturation[i] = fmax(0,fmin(1,saturation[i] - event.yrel*.025));
+
+            HSV2RGB(hue[i],saturation[i],value[i], identity->color_table.entries[i]);
+        };
+
+        pieceRoot->addChild(s);
+
+        Element* v = new Element;
+        v->flags = Flags::texture;
+        v->data.texture = textureCache.get("./Resources/Textures/Icons/value.png");
+        v->position = position + glm::vec2{64.0f,RenderGame::kPieceDimensions.y+1};
+        v->size= {32.0f,32.0f};
+        v->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
+            //Initializes a static float for each color table entry to the hue of that entry
+            value[i] = fmax(0,fmin(1,value[i] - event.yrel*.005));
+
+            HSV2RGB(hue[i],saturation[i],value[i], identity->color_table.entries[i]);
+        };
+
+        pieceRoot->addChild(v);
     }
 
 

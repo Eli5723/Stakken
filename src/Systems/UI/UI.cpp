@@ -7,7 +7,9 @@ namespace UI {
 
     struct Data {
         Element* screen;
-        Element* focus;
+
+        Element* focus = 0;
+        Element* drag = 0;
     } s_Data;
 
     // UI driver functions
@@ -25,22 +27,24 @@ namespace UI {
     }
 
     // Recursively propogate clicks
-    Element* click(Element* root, int x, int y){
-        Element* node = root->children;
+    Element* click(Element* current, int x, int y){
+        Element* child = current->children;
         Element* clicked = 0;
-        if (node){
-            while (node != nullptr){
+        if (child){
+            while (child != nullptr){
                 //Propogate clicks to the lowest hit element in the chain
-                if (x >= node->position.x && x <= node->position.x + node->size.x && y >= node->position.y && y <= node->position.y + node->size.y) {
-                    return click(node,x - node->position.x, y - node->position.y);
+                if (x >= child->position.x && x <= child->position.x + child->size.x && y >= child->position.y && y <= child->position.y + child->size.y) {
+                    return click(child,x - child->position.x, y - child->position.y);
                 }
 
-                node = node->next;
+                child = child->next;
             }
         } else {
-            if (root->clickCallback){
-                root->clickCallback(x,y);
-                return root;
+            if (current->clickCallback){
+                current->clickCallback(x,y);
+                return current;
+            } else if (current->moveCallback){
+                s_Data.drag = current;
             }
         }
         return clicked;
@@ -63,6 +67,15 @@ namespace UI {
     void inputCapture(const SDL_TextInputEvent& event){
         if (s_Data.focus && s_Data.focus->textCallback)
             s_Data.focus->textCallback(event);
+    }
+
+    void moveCapture(const SDL_MouseMotionEvent& event){
+        if (s_Data.drag && s_Data.drag->moveCallback)
+            s_Data.drag->moveCallback(event);
+    }
+
+    void endDrag(){
+        s_Data.drag = 0;
     }
 
     void clearFocus(){

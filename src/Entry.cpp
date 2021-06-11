@@ -1,6 +1,7 @@
 #include "./Entry.h"
 #include "Systems/Assets/BGShader.h"
 #include "Systems/Assets/LinearTexture.h"
+#include "Systems/UI/Element.h"
 
 #include <SDL2/SDL_events.h>
 #include <vector>
@@ -202,6 +203,14 @@ OnEvent(const SDL_Event& event){
 
     case SDL_MOUSEBUTTONDOWN:
         OnClick(event);
+    break;
+
+    case SDL_MOUSEMOTION:
+        UI::moveCapture(event.motion);
+    break;
+
+    case SDL_MOUSEBUTTONUP:
+        UI::endDrag();
     break;
 
     case SDL_TEXTINPUT:
