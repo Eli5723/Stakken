@@ -62,7 +62,7 @@ Board::~Board() {
 	delete[] rows;
 }
 
-void Board::ApplyPiece(Piece* piece) {
+int Board::ApplyPiece(Piece* piece) {
 	int linesCleared = 0;
 
 	for (int j = 0; j < 4; j++) {
@@ -81,6 +81,8 @@ void Board::ApplyPiece(Piece* piece) {
 			linesCleared++;
 		}
 	}
+	
+	return linesCleared;
 }
 
 void Board::addLine(int hole) {
@@ -111,6 +113,9 @@ void Board::addLine(int hole) {
 }
 
 bool Board::checkFit(Piece* piece) {
+	if (piece->y < 0)
+		return false;
+
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			if (piece->tileAt(i, j) == TileType::Empty)

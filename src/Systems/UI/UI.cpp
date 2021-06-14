@@ -28,12 +28,16 @@ namespace UI {
 
     // Recursively propogate clicks
     Element* click(Element* current, int x, int y){
+        if (!current->enabled)
+            return 0;
+
         Element* child = current->children;
         Element* clicked = 0;
         if (child){
             while (child != nullptr){
                 //Propogate clicks to the lowest hit element in the chain
                 if (x >= child->position.x && x <= child->position.x + child->size.x && y >= child->position.y && y <= child->position.y + child->size.y) {
+                    printf("test: %i,%i\n", x, y);
                     return click(child,x - child->position.x, y - child->position.y);
                 }
 
@@ -86,6 +90,11 @@ namespace UI {
     void Render(Element* root,glm::vec2 baseOffset){
         Element* node = root->children;
         while (node != nullptr){
+            if (node->enabled == false){
+                node = node->next;
+                continue;
+            }
+
             const glm::vec2 offset = baseOffset + node->position;
 
             if (node->flags & Flags::background)
@@ -101,8 +110,12 @@ namespace UI {
                 Renderer::DrawQuad(offset ,node->size, node->data.texture->id);
             
             if (node->flags & Flags::piece)
-                RenderGame::DrawPiece(offset, node->data.piece.colorTable, *activeAssets.pieceTexture, node->data.piece.type, node->data.piece.rotation);
+                RenderGame::DrawPiece(offset, node->data.piece.colorTable, activeAssets.pieceTexture, node->data.piece.type, node->data.piece.rotation);
 
+            
+            
+            
+            
             Render(node,baseOffset + node->position);
             node = node->next;
         }

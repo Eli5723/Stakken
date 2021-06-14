@@ -9,6 +9,7 @@
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
+#include <cstdlib>
 #include <glm/fwd.hpp>
 #include <string>
 
@@ -156,7 +157,6 @@ Element* Options(InputProfile* profile, Identity* identity){
             HSV2RGB(hue[i],saturation[i],value[i], identity->color_table.entries[i]);
         };
 
-        printf("H S V : %d, %f, %f, %f,\n",i,hue[i], saturation[i],value[i]);
 
         pieceRoot->addChild(h);
 
@@ -189,13 +189,20 @@ Element* Options(InputProfile* profile, Identity* identity){
         pieceRoot->addChild(v);
     }
 
-
     pieceRoot->position = {list->size.x,0};
     pieceRoot->size = {RenderGame::kPieceDimensions.x * 4,list->size.y};
     pieceRoot->flags = Flags::background | border;
 
+    // Graphical Options
     base->addChild(pieceRoot);
+    
 
+    Element* graphicsOptions = new Element;
+    graphicsOptions->flags = Flags::border | Flags::background;
+    graphicsOptions->size = { base->size.x,100.0f };
+    graphicsOptions->position = { 0,list->size.y };
+
+    base->addChild(graphicsOptions);
 
     return base;
 }

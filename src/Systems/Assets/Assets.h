@@ -85,7 +85,7 @@ class AssetCache {
 		if (iter == loadedFiles.end()) {
 			type* toLoad = new type(path);
 			
-			SDL_Log("Loaded: %s", path.c_str());
+			// SDL_Log("Loaded: %s", path.c_str());
 
 			loadedFiles.insert({ path, toLoad });
 			return toLoad;
@@ -110,8 +110,18 @@ extern AssetCache<Font> fontCache;
 struct ActiveAssets {
     Texture* pieceTexture;
     BGShader* bgShader;
-    Font* font;
-    Sound* sounds[7];
+	Font* font;
+	
+	Sound* sound_lineclear = 0;
+    Sound* sound_sonicdrop = 0;
+    Sound* sound_harddrop = 0;
+    Sound* sound_lock = 0;
+
+	Sound* sound_combo5 = 0;
+    Sound* sound_combo7 = 0;
+    Sound* sound_combo10 = 0;
+    Sound* sound_combo12 = 0;
+    Sound* sound_combo14 = 0;
 };
 
 extern ActiveAssets activeAssets;

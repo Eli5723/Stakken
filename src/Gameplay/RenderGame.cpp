@@ -1,6 +1,8 @@
 #include "./RenderGame.h"
 
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
+#include <glm/trigonometric.hpp>
 
 #include "../Systems/Rendering/Renderer.h"
 #include "../Systems/Assets/Texture.h"
@@ -11,8 +13,9 @@ inline int min(int x){
 }
 
 namespace RenderGame {
-    Font* gameBoardFont;
 
+    Options options;
+    
     float kMargin = 2.0f;
     float kGaps = 16.0f;
 
@@ -36,13 +39,18 @@ namespace RenderGame {
         pixelThickness = thickness;
     }
 
-    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture){
+    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture* texture){
         for (int y=0; y < 4; y++){
             for (int x = 0; x < 4; x++){
                 if (piece.tileAt(x,y) != TileType::Empty){
                     
                     glm::vec2 tilePosition = position + glm::vec2{kTileSize * x, kTileSize * y};
-                    Renderer::DrawQuad(tilePosition, kTileDimensions, texture.id, identity.color_table.entries[piece.type]);
+
+                    if (texture)
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, texture->id, identity.color_table.entries[piece.type]);
+                    else
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, identity.color_table.entries[piece.type]);
+
 
                     const Connection connections = piece.connectionAt(x,y);
                     if ((connections & Side::Up) ^ Side::Up)
@@ -63,7 +71,7 @@ namespace RenderGame {
     }
 
     // Draw a piece without having a piece object; used to draw pieces in the options menu
-    void DrawPiece(const glm::vec2& position, ColorTable* colorTable, Texture& texture, int type, int rotation){
+    void DrawPiece(const glm::vec2& position, ColorTable* colorTable, Texture* texture, int type, int rotation){
         Tile* tiles = PieceDefintions::getPieceTiles(type, rotation);
         Connection* connections = PieceDefintions::getPieceConnections(type, rotation);
 
@@ -71,7 +79,11 @@ namespace RenderGame {
             for (int x = 0; x < 4; x++){
                 if (tiles[x + y * 4] != TileType::Empty){
                     glm::vec2 tilePosition = position + glm::vec2{kTileSize * x, kTileSize * y};
-                    Renderer::DrawQuad(tilePosition, kTileDimensions, texture.id, colorTable->entries[type]);
+                    
+                    if (texture)
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, texture->id, colorTable->entries[type]);
+                    else
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, colorTable->entries[type]);
 
                     const Connection connection = connections[x + y * 4];
                     if ((connection & Side::Up) ^ Side::Up)
@@ -90,13 +102,17 @@ namespace RenderGame {
         }
     }
 
-    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture, int cutoff){
+    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture* texture, int cutoff){
         for (int y=cutoff; y < 4; y++){
             for (int x = 0; x < 4; x++){
                 if (piece.tileAt(x,y) != TileType::Empty){
                     
                     glm::vec2 tilePosition = position + glm::vec2{kTileSize * x, kTileSize * y};
-                    Renderer::DrawQuad(tilePosition, kTileDimensions, texture.id, identity.color_table.entries[piece.type]);
+                    
+                    if (texture)
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, texture->id, identity.color_table.entries[piece.type]);
+                    else
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, identity.color_table.entries[piece.type]);
 
                     const Connection connections = piece.connectionAt(x,y);
                     if ((connections & Side::Up) ^ Side::Up)
@@ -117,16 +133,21 @@ namespace RenderGame {
     }
 
 
-    void DrawGhostPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture){
+    void DrawGhostPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture* texture){
         for (int y=0; y < 4; y++){
             for (int x = 0; x < 4; x++){
-                if (piece.tileAt(x,y) != TileType::Empty)
-                    Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture.id, identity.color_table.entries[piece.type] * glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});
+                if (piece.tileAt(x,y) != TileType::Empty) {
+                    if (texture)
+                        Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture->id, identity.color_table.entries[piece.type] * glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});
+                    else
+                        Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, identity.color_table.entries[piece.type] * glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});;
+
+                }
             }
         }
     }
 
-    void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture& texture){
+    void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture* texture){
         // Draw "Board" background + Border
         Renderer::QuadBox(position, kBoardDimensions, pixelThickness, {1,1,1,1});
         Renderer::DrawQuad(position, kBoardDimensions, {0,0,0,1});
@@ -138,41 +159,47 @@ namespace RenderGame {
                 if (type != TileType::Empty) {
                     
                     const glm::vec2 tilePosition = position + glm::vec2{kTileSize * x, kTileSize * (y - Board::kOverflowRows)};
-                    Renderer::DrawQuad(tilePosition, kTileDimensions, texture.id, identity.color_table.entries[(int)type]);
-                    
-                    // const Connection connections = board.connectionAt(x, y);
 
-                    // // Cultris Style Outlines
-                    // if ((connections & Side::Up) ^ Side::Up)
-                    //     Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize+1,1},{1,1,1,1});
-                    
-                    // if ((connections & Side::Down) ^ Side::Down)
-                    //     Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize},glm::vec2{kTileSize,1},{1,1,1,1});
+                    if (texture)
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, texture->id, identity.color_table.entries[(int)type]);
+                    else 
+                        Renderer::DrawQuad(tilePosition, kTileDimensions, identity.color_table.entries[(int)type]);
 
-                    // if ((connections & Side::Left) ^ Side::Left)
-                    //     Renderer::DrawQuad(tilePosition,glm::vec2{1,kTileSize},{1,1,1,1});
+                    if (options.outlineStyle == 1) {
+                        // Cultris Style Outlines
+                        const Connection connections = board.connectionAt(x, y);
 
-                    // if ((connections & Side::Right) ^ Side::Right)
-                    //     Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize,0},glm::vec2{1,kTileSize+1},{1,1,1,1}); 
+                        if ((connections & Side::Up) ^ Side::Up)
+                            Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize+1,1},{1,1,1,1});
+                        
+                        if ((connections & Side::Down) ^ Side::Down)
+                            Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize},glm::vec2{kTileSize,1},{1,1,1,1});
 
+                        if ((connections & Side::Left) ^ Side::Left)
+                            Renderer::DrawQuad(tilePosition,glm::vec2{1,kTileSize},{1,1,1,1});
+
+                        if ((connections & Side::Right) ^ Side::Right)
+                            Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize,0},glm::vec2{1,kTileSize+1},{1,1,1,1}); 
+                    } else if (options.outlineStyle == 2) {
                     // TGM Style Outlines
-                    if (board.tileAt(x,y-1) == TileType::Empty)
-                        Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize+1,pixelThickness},{1,1,1,1});
-                    
-                    if (y < Board::kTotalRows-1&& board.tileAt(x,y+1) == TileType::Empty)
-                        Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize},glm::vec2{kTileSize,pixelThickness},{1,1,1,1});
+                        if (board.tileAt(x,y-1) == TileType::Empty)
+                            Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize+1,pixelThickness},{1,1,1,1});
+                        
+                        if (y < Board::kTotalRows-1&& board.tileAt(x,y+1) == TileType::Empty)
+                            Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize},glm::vec2{kTileSize,pixelThickness},{1,1,1,1});
 
-                    if (x > 0 && board.tileAt(x-1,y) == TileType::Empty)
-                        Renderer::DrawQuad(tilePosition,glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
+                        if (x > 0 && board.tileAt(x-1,y) == TileType::Empty)
+                            Renderer::DrawQuad(tilePosition,glm::vec2{pixelThickness,kTileSize},{1,1,1,1});
 
-                    if (x < Board::kWidth && board.tileAt(x+1,y) == TileType::Empty)
-                        Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize,0},glm::vec2{pixelThickness,kTileSize+1},{1,1,1,1}); 
+                        if (x < Board::kWidth && board.tileAt(x+1,y) == TileType::Empty)
+                            Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize,0},glm::vec2{pixelThickness,kTileSize+1},{1,1,1,1});
+                    }
                 }
             }
         }
     }
 
-    void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture& texture){
+    void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture* texture){
         
         // Draw Profile Picture
         if (identity.pfp)
@@ -186,6 +213,8 @@ namespace RenderGame {
 
         const glm::vec2 boardPosition = position + glm::vec2{0, kProfilePictureSize + kGaps};
 
+
+        // GAMEPLAY 
         DrawBoard(boardPosition, *game.board, identity, texture);
 
         // Draw Ghost Piece
@@ -206,11 +235,28 @@ namespace RenderGame {
         Renderer::DrawQuad(previewPosition, kPieceDimensions, {0,0,0,1});
         DrawPiece(previewPosition, *game.nextPiece, identity, texture);
 
+        // END OF GAMEPLAY
+ 
+        if (game.state == Game::GameState::Disabled){
+            Renderer::DrawQuad(boardPosition, kBoardDimensions, {0,0,0,.5f});
+            Renderer::DrawStrC(boardPosition + glm::vec2{kBoardDimensions.x/2.0f, kBoardDimensions.y/3.0f},2.0f,"Game Over", activeAssets.font);
+        }
+
         // Draw Game Stats
         const glm::vec2 statsPosition = previewPosition + glm::vec2{0,kGaps + kPieceDimensions.y};
-
         Renderer::QuadBox(statsPosition, kStatsDimensions, pixelThickness, {1,1,1,1});
         Renderer::DrawQuad(statsPosition, kStatsDimensions, {0,0,0,1});
+        
+        char stats[50];
+        float bpm = (float)game.pieces/((float)game.time/60000.0f);
+        sprintf(stats,"Time: %.2f\nClears:%i\nPieces:%i\nBPM:%.0f",(float)game.time/1000.0f,game.clears,game.pieces, bpm);
+        Renderer::DrawStr(statsPosition, 0.5f, stats, activeAssets.font);
+        
+        // Speedometer
+        char bpmStr[5];
+        sprintf(bpmStr,"%.0f",bpm);
+        Renderer::DrawNeedle(statsPosition+ glm::vec2{kStatsDimensions.x/2,kStatsDimensions.y - 100}, 55.0f, glm::radians(180.0f + (bpm)));
+        Renderer::DrawStrC(statsPosition+ glm::vec2{kStatsDimensions.x/2 -10, kStatsDimensions.y - 100}, 2.0f, bpmStr, activeAssets.font);
     }
 
 }

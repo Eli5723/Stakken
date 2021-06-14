@@ -30,6 +30,8 @@ public:
 	static void QuadBox(const glm::vec2& position, const glm::vec2& size, const float thickness, const glm::vec4& color);
 	static void BlackBox(const glm::vec2& position, const glm::vec2& size, const float thickness);
 
+	static void DrawStr(const glm::vec2& position,float scale, const std::string& str, Font* font);
+	static void DrawStrC(const glm::vec2& position,float scale, const std::string& str , Font* font);
 
-	static void DrawStr(const glm::vec2& position,float scale, std::string str, Font* font);
+	static void DrawNeedle(const glm::vec2& origin, float radius, float angle);
 };

@@ -32,7 +32,7 @@ struct Board {
 	inline Tile tileAt(int x, int y) { return rows[y]->contents[x]; };
 	inline Connection connectionAt(int x, int y){ return rows[y]->connections[x]; };
 
-	void ApplyPiece(Piece* piece);
+	int ApplyPiece(Piece* piece);
 
 	void removeLine(int row);
 

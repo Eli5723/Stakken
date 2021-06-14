@@ -1,6 +1,5 @@
 #pragma once
 
-// For debugging purposes
 enum class TetrisAction {
     None,
     Left,
@@ -10,5 +9,6 @@ enum class TetrisAction {
     SonicDrop,
     RCW,
     RCCW,
-    Flip
+    Flip,
+    RemoveRow,
 };

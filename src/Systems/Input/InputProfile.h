@@ -2,12 +2,9 @@
 
 #include <fstream>
 #include <string>
-#include <filesystem>
 #include <iostream>
 
 #include <SDL2/SDL.h>
-
-namespace fs = std::filesystem;
 
 struct InputProfile {
     const std::string kProfileDirectory = "./Profiles/";

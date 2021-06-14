@@ -3,6 +3,7 @@
 #include <GL/gl3w.h>
 #include <array>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/scalar_constants.hpp>
 #include <glm/fwd.hpp>
 #include <iostream>
 
@@ -442,7 +443,7 @@ void Renderer::BlackBox(const glm::vec2& position, const glm::vec2& size, const 
 	DrawQuad(position + glm::vec2(size.x, 0), { 2,size.y }, { 1,1,1,1 });
 }
 
-void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, Font* font) {
+void Renderer::DrawStr(const glm::vec2& position,float scale, const std::string& str, Font* font) {
 
 	//If we run out of indices or textures slots, draw everything and reset the buffers
 	if (s_Data.IndexCount + str.length()*6 >= MaxIndexCount || s_Data.TextureSlotIndex > 31) {
@@ -519,4 +520,138 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, std::string str, F
 		penX += glyph.advance * scale;
 
 	}
+}
+
+void Renderer::DrawStrC(const glm::vec2& position,float scale, const std::string &str, Font* font) {
+
+	//If we run out of indices or textures slots, draw everything and reset the buffers
+	if (s_Data.IndexCount + str.length()*6 >= MaxIndexCount || s_Data.TextureSlotIndex > 31) {
+		EndBatch();
+		Flush();
+		BeginBatch();
+	}
+	
+	const glm::vec4 color = { 1.0f,1.0f,1.0f,1.0f };
+
+	//Find the first open texture slot and insert the texture
+	float textureIndex = 0.0f;
+	for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
+		if (s_Data.TextureSlots[i] == font->atlasId) {
+			textureIndex = (float)i;
+			break;
+		}
+	}
+
+	if (textureIndex == 0.0f) {
+		textureIndex = (float)s_Data.TextureSlotIndex;
+		s_Data.TextureSlots[(int)textureIndex] =  font->atlasId;
+		s_Data.TextureSlotIndex++;
+	}
+
+	//Queue a quad for each 
+
+	const float kMargin = 4.0f;
+	float penX = kMargin;
+	float penY = font->lineHeight * scale;
+	
+	float offset = 0;
+	for (int i = 0; i < str.length(); i++){
+		char charCode = str[i];
+		if (charCode == '\n')
+			continue;
+		offset += font->glyphs[charCode].advance * scale;
+	}
+	offset /= 2.0f;
+
+	for (unsigned int i = 0; i < str.length(); i++) {
+
+		char charCode = str[i];
+
+		if (charCode == '\n') {
+			penX = kMargin;
+			penY += font->lineHeight * scale;
+			continue;
+		}
+
+		Font::Glyph& glyph = font->glyphs[(int)charCode];
+
+		// TODO: fix arbitrary offset
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX - offset, position.y + penY, 0) + glm::vec3(0,glyph.bearing.y*scale, 0);
+		s_Data.QuadBufferPtr->color = color;
+		s_Data.QuadBufferPtr->texCoords = glyph.leftTop;
+		s_Data.QuadBufferPtr->texIndex = textureIndex;
+		s_Data.QuadBufferPtr->view = s_Data.currentView;
+		s_Data.QuadBufferPtr++;
+
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX + glyph.size.x * scale - offset, penY + position.y, 0) + glm::vec3(0,glyph.bearing.y*scale, 0);
+		s_Data.QuadBufferPtr->color = color;
+		s_Data.QuadBufferPtr->texCoords = glyph.rightTop;
+		s_Data.QuadBufferPtr->texIndex = textureIndex;
+		s_Data.QuadBufferPtr->view = s_Data.currentView;
+		s_Data.QuadBufferPtr++;
+
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX + (glyph.size.x * scale) - offset, penY + position.y + glyph.size.y * scale, 0) + glm::vec3(0,glyph.bearing.y*scale, 0);
+		s_Data.QuadBufferPtr->color = color;
+		s_Data.QuadBufferPtr->texCoords = glyph.rightBottom;
+		s_Data.QuadBufferPtr->texIndex = textureIndex;
+		s_Data.QuadBufferPtr->view = s_Data.currentView;
+		s_Data.QuadBufferPtr++;
+
+		s_Data.QuadBufferPtr->position = glm::vec3(position.x + penX - offset, penY + position.y + glyph.size.y * scale, 0) + glm::vec3(0,glyph.bearing.y*scale, 0);
+		s_Data.QuadBufferPtr->color = color;
+		s_Data.QuadBufferPtr->texCoords = glyph.leftBottom;
+		s_Data.QuadBufferPtr->texIndex = textureIndex;
+		s_Data.QuadBufferPtr->view = s_Data.currentView;
+		s_Data.QuadBufferPtr++;
+
+		s_Data.IndexCount += 6;
+		penX += glyph.advance * scale;
+
+	}
+}
+
+
+void Renderer::DrawNeedle(const glm::vec2& origin, float radius, float angle){
+
+	const glm::vec4 color{1,1,1,.5f};
+
+	constexpr float adiff = 20.0f; 
+	constexpr float offsetLeft = ((glm::pi<float>()/180.0f)*(180.0f - adiff));
+	constexpr float offsetRight = ((glm::pi<float>()/180.0f)*(180.0f + adiff)); 
+
+	const glm::vec3 left = {origin.x + cos(angle + offsetLeft) * radius* .2f, origin.y + sin(angle + offsetLeft) * radius * .2f, 0};
+	const glm::vec3 right{origin.x + cos(angle + offsetRight) * radius * .2f, origin.y + sin(angle + offsetRight) * radius * .2f, 0};
+
+	const glm::vec3 tip{origin.x + cos(angle) * radius, origin.y + sin(angle) * radius, 0};
+
+	s_Data.QuadBufferPtr->position = left;
+	s_Data.QuadBufferPtr->color = color;
+	s_Data.QuadBufferPtr->texCoords = { 0.0f,0.0f };
+	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
+	s_Data.QuadBufferPtr++;
+
+	s_Data.QuadBufferPtr->position = tip;
+	s_Data.QuadBufferPtr->color = color;
+	s_Data.QuadBufferPtr->texCoords =  { 1.0f,0.0f };
+	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
+	s_Data.QuadBufferPtr++;
+
+	s_Data.QuadBufferPtr->position = tip;
+	s_Data.QuadBufferPtr->color = color;
+	s_Data.QuadBufferPtr->texCoords =  { 1.0f,1.0f };
+	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
+	s_Data.QuadBufferPtr++;
+
+	s_Data.QuadBufferPtr->position = right;
+	s_Data.QuadBufferPtr->color = color;
+	s_Data.QuadBufferPtr->texCoords =  { 0.0f, 1.0f };
+	s_Data.QuadBufferPtr->texIndex = s_Data.WhiteTextureSlot;
+	s_Data.QuadBufferPtr->view = s_Data.currentView;
+	s_Data.QuadBufferPtr++;
+
+	s_Data.IndexCount +=  6;
+
 }

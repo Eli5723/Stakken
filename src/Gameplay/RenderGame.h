@@ -10,6 +10,20 @@
 #include "../Systems/Assets/Assets.h"
 
 namespace RenderGame {
+    enum OutlineStyle {
+        NONE,
+        CULTRIS,
+        TGM
+    };
+    
+    const int kOutlineStyles = 3;
+
+    struct Options {
+        int outlineStyle = OutlineStyle::TGM;
+    };
+
+    extern Options options;
+
     void SetPixelTickness(float thickness);
 
     extern const float kTileSize;
@@ -25,13 +39,13 @@ namespace RenderGame {
 
     void SetPixelTickness(float thickness);
 
-    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture& texture);
+    void DrawPiece(const glm::vec2& position, Piece& piece, Identity& identity, Texture* texture);
 
     // Draw a piece without having a piece object; used to draw pieces in the options menu
-    void DrawPiece(const glm::vec2& position, ColorTable* colorTable, Texture& texture, int type, int rotation);
+    void DrawPiece(const glm::vec2& position, ColorTable* colorTable, Texture* texture, int type, int rotation);
 
-    void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture& texture);
-    void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture& texture);
+    void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture* texture);
+    void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture* texture);
 
     extern const float kTileSize;
 

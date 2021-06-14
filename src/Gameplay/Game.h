@@ -4,8 +4,9 @@
 #include "./Piece.h"
 #include "./Tile.h"
 #include "../Systems/Input/InputBuffer.h"
+#include "../Systems/Input/InputProfile.h"
 #include "./Randomizers/xoroshiroRandomizer.h"
-
+#include "../Systems/Assets/Assets.h"
 
 #include <SDL2/SDL.h>
 
@@ -16,6 +17,14 @@ const int kInitialPieceY = 0;
 
 struct Game {
 	public:
+	enum GameState {
+		Disabled,
+		Playing
+	};
+	int state;
+
+	// Ugly association
+	InputProfile* profile;
 
 	Board* board;
 	
@@ -24,15 +33,56 @@ struct Game {
 
 	xoroshiroRandomizer pieceRandomizer;
 	xoroshiroRandomizer holeRandomizer;
-	int time;
 
-	Game() {
+	// Stats
+	int time;
+	int clears;
+	int pieces;
+	int lastPlacement;
+	int speed;
+
+	Game(InputProfile* profile) {
+		this->profile = profile;
+
+		// TODO: Start Inactive
+		state = GameState::Playing;
+
 		board = new Board();
 
-		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
-		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
+		TileType firstPieceType = (TileType)(pieceRandomizer.next()%7);
+		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
 
+		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, firstPieceType, profile->rotation[firstPieceType]);
+		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+
+		// Stats
 		time = 0;
+		clears = 0;
+		pieces = 0;
+		lastPlacement = 0;
+		speed = 0;
+	}
+
+	void Reset(){
+		board->clear();
+		TileType firstPieceType = (TileType)(pieceRandomizer.next()%7);
+		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
+
+		heldPiece->Convert(kInitialPieceX, kInitialPieceY, firstPieceType, profile->rotation[firstPieceType]);
+		nextPiece->Convert(kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+
+		// Stats
+		time = 0;
+		clears = 0;
+		pieces = 0;
+	}
+
+	void Win(){
+		state = GameState::Disabled;
+	}
+
+	void Lose(){
+		state = GameState::Disabled;
 	}
 
 	~Game(){
@@ -109,11 +159,37 @@ struct Game {
 	}
 
 	void ApplyHeldPiece(){
-		Piece* temp = heldPiece;
+		// If the piece cannot possibly be applied, lose
+		if (!board->checkFit(heldPiece)) {
+			state = Disabled;
+			return;
+		}
+		// Apply Piece to board
+		int cleared = board->ApplyPiece(heldPiece);
 
-		board->ApplyPiece(heldPiece);
+		// Play Sounds
+		activeAssets.sound_lock->play();
+		if (cleared > 0) {
+			activeAssets.sound_lineclear->play();
+		}
+
+		// Get next piece
+		Piece* temp = heldPiece;
 		heldPiece = nextPiece;
-		
-		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, (TileType)(pieceRandomizer.next()%7), 0);
+		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
+
+		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+
+		// Increment stats
+		pieces += 1;
+		clears+= cleared;
+		if (lastPlacement != 0)
+			speed = time - lastPlacement;
+		lastPlacement = time;
+
+		// Check Rules: TODO: make dynamic
+		if (this->clears >= 40) {
+			Win();
+		}
 	}
 };

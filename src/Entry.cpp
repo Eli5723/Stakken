@@ -49,11 +49,10 @@ struct CientState {
     InputProfile* inputProfile;
     KeyboardMapper* keyboard;
 
+    UI::Element* optionsUI;
+
     vector<Game*> otherGames;
     vector<Identity*> otherPlayers;
-
-    int currentBGShader = 0;
-    int currentTexture = 0;
 } clientState;
 
 // Init / Entry
@@ -67,7 +66,6 @@ OnInit(){
     gl3wInit();
 
     window = SDL_CreateWindow("Stakken",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_CreateContext(window);
@@ -80,43 +78,34 @@ OnInit(){
     glViewport(0,0,WINDOW_WIDTH,WINDOW_HEIGHT);
 
     Renderer::Init(Resolution);
-
     UI::Init(Resolution);
-
-    // Initialize Asset Systems
-    BGShader::Init();
-    ScreenQuad::Init();
-    activeAssets.bgShader = shaderCache.get(shaderList.files[clientState.currentBGShader%shaderList.files.size()]);
-    activeAssets.pieceTexture = textureCache.get(textureList.files[5]);
-    activeAssets.font =  fontCache.get(fontList.files[1]);
 
     // Initialize Audio
     if (Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,4,2048) < 0){
         SDL_Log("Failed to load audio.");
     }
 
+    // Initialize Asset Systems
+    BGShader::Init();
+    ScreenQuad::Init();
+    activeAssets.bgShader = shaderCache.get(shaderList.files[0]);
+    activeAssets.pieceTexture = 0;//textureCache.get(textureList.files[5]);
+    activeAssets.font =  fontCache.get(fontList.files[1]);
+
+    activeAssets.sound_lock = soundCache.get("./Resources/Sounds/place.wav");
+    activeAssets.sound_lineclear = soundCache.get("./Resources/Sounds/clear.WAV");
+
     // Initialize Client state
-    clientState.game = new Game();
     clientState.identity = new Identity(defaultIdentity);
-    clientState.identity->pfp = new LinearTexture("./Resources/Textures/pfp/fuu.png");
-    clientState.inputProfile = new InputProfile;
+    clientState.identity->pfp = new LinearTexture("./Resources/Textures/pfp/eeli.png");
+    clientState.inputProfile = new InputProfile("Default");
     clientState.keyboard = new KeyboardMapper(*clientState.inputProfile);
+    clientState.game = new Game(clientState.inputProfile);
 
+    clientState.optionsUI = UI::Options(clientState.inputProfile, clientState.identity);
+    UI::addToScreen(clientState.optionsUI);
+    clientState.optionsUI->position = {RenderGame::kGameDimensions.x + RenderGame::kGaps, 100.0f};
 
-    // Create input options
-    UI::Element* inputOptions = UI::Options(clientState.inputProfile, clientState.identity);
-    inputOptions->position = {500,32};
-    UI::addToScreen(inputOptions);
-
-    // Create resource options
-    UI::Element* shaderOptions = new UI::Element;
-    shaderOptions->flags = UI::Flags::text | UI::Flags::background;
-    shaderOptions->data.text = "Shader";
-    shaderOptions->size = {100.0f,32.0f};
-    shaderOptions->clickCallback = [](int x, int y){
-        activeAssets.bgShader = shaderCache.get(shaderList.files[++clientState.currentBGShader%shaderList.files.size()]);
-    };
-    UI::addToScreen(shaderOptions);
 
     return true;
 }
@@ -149,11 +138,14 @@ OnExecute(){
 // Main loop
 void 
 OnLoop(int dt){
-    clientState.keyboard->update(dt);
-    clientState.game->ApplyInput(clientState.keyboard->buffer);
-    clientState.keyboard->buffer.flush();
-    
-    clientState.game->Update(dt);
+
+    // Update the game if it's being played
+    if (clientState.game->state == Game::GameState::Playing){
+        clientState.keyboard->update(dt);
+        clientState.game->ApplyInput(clientState.keyboard->buffer);
+        clientState.keyboard->buffer.flush();
+        clientState.game->Update(dt);
+    }
 }
 
 void 
@@ -170,7 +162,7 @@ OnRender(int dt){
     Renderer::BeginBatch();
     Renderer::TargetView(0);
 
-    RenderGame::DrawGame({RenderGame::kGaps,64.0f},*clientState.game,*clientState.identity,*activeAssets.pieceTexture);
+    RenderGame::DrawGame({RenderGame::kGaps,64.0f},*clientState.game,*clientState.identity, activeAssets.pieceTexture);
 
     UI::Render();
 
@@ -265,8 +257,22 @@ OnInput(const SDL_KeyboardEvent& key){
     if (UI::keyCapture(key))
         return;
     
-    // Send input to the board
-    clientState.keyboard->keyEvents(key.keysym.scancode);
+    // Reset the game
+    if (key.keysym.scancode == SDL_SCANCODE_F2) {
+        clientState.game->Reset();
+        clientState.game->state = Game::GameState::Playing;        
+        return;
+    }
+
+    if (key.keysym.scancode == SDL_SCANCODE_F1) {
+        clientState.optionsUI->enabled = !clientState.optionsUI->enabled;// RenderGame::options.outlineStyle = (RenderGame::options.outlineStyle + 1) % RenderGame::kOutlineStyles;
+        return;
+    }
+
+    // Process game key events if the game is being palyed
+    if (clientState.game->state == Game::GameState::Playing){
+        clientState.keyboard->keyEvents(key.keysym.scancode);
+    }
 }
 
 void

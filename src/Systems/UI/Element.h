@@ -23,7 +23,8 @@ namespace UI {
         background = 1 << 1,
         text = 1 << 2,
         texture = 1 << 3,
-        piece = 1 << 4
+        piece = 1 << 4,
+        structural = 1 << 5
     };
 
     union ElementData {
@@ -37,6 +38,8 @@ namespace UI {
     };
 
     struct Element {
+        bool enabled = true;
+
         Element* parent = 0;
         Element* children = 0;
         Element* next = 0;
@@ -53,6 +56,10 @@ namespace UI {
 
         int flags = 0;
         ElementData data{0};
+
+        void makeCentered(){
+            position = parent->size/2.0f - size/2.0f;
+        }
 
         void addChild(Element* toAdd){
             toAdd->parent = this;
