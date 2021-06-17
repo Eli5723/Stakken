@@ -8,6 +8,6 @@ class Texture {
 		std::string path;
 		
 		GLuint id;
-		Texture(const std::string& path);
+		Texture(const char* path);
 		void use(GLenum textureSlot);
 };

@@ -37,7 +37,7 @@ void BGShader::Init(){
 
 using std::string;
 
-BGShader::BGShader(const string& path) {
+BGShader::BGShader(const char* path) {
 	this->path = path;
 	
 	//Read in background shader source

@@ -1,0 +1,82 @@
+Date : 2021-06-15 05:31:36
+Directory : /home/eli/Stakken/src
+Total : 49 files,  3731 codes, 184 comments, 902 blanks, all 4817 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         48 |      2,947 |        157 |        865 |      3,969 |
+| C        |          1 |        784 |         27 |         37 |        848 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                  |         49 |      3,731 |        184 |        902 |      4,817 |
+| Gameplay                                                           |         12 |        923 |         53 |        285 |      1,261 |
+| Gameplay/Randomizers                                               |          2 |         30 |         10 |         14 |         54 |
+| States                                                             |          1 |         17 |          0 |          6 |         23 |
+| Systems                                                            |         31 |      2,544 |        115 |        534 |      3,193 |
+| Systems/Assets                                                     |         12 |        382 |         21 |        120 |        523 |
+| Systems/Input                                                      |          3 |        193 |         12 |         51 |        256 |
+| Systems/Rendering                                                  |          7 |      1,445 |         61 |        224 |      1,730 |
+| Systems/UI                                                         |          6 |        486 |         21 |        132 |        639 |
++--------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                           | language | code       | comment    | blank      | total      |
++--------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| /home/eli/Stakken/src/Entry.cpp                                    | C++      |        221 |         15 |         64 |        300 |
+| /home/eli/Stakken/src/Entry.h                                      | C++      |         13 |          1 |          8 |         22 |
+| /home/eli/Stakken/src/Gameplay/Board.cpp                           | C++      |        147 |         14 |         37 |        198 |
+| /home/eli/Stakken/src/Gameplay/Board.h                             | C++      |         30 |          0 |         17 |         47 |
+| /home/eli/Stakken/src/Gameplay/Game.h                              | C++      |        152 |         11 |         38 |        201 |
+| /home/eli/Stakken/src/Gameplay/Piece.cpp                           | C++      |         22 |          0 |          9 |         31 |
+| /home/eli/Stakken/src/Gameplay/Piece.h                             | C++      |         37 |          0 |          7 |         44 |
+| /home/eli/Stakken/src/Gameplay/PieceDefinitions.h                  | C++      |        236 |          0 |         63 |        299 |
+| /home/eli/Stakken/src/Gameplay/Randomizers/xoroshiroRandomizer.cpp | C++      |         22 |         10 |         11 |         43 |
+| /home/eli/Stakken/src/Gameplay/Randomizers/xoroshiroRandomizer.h   | C++      |          8 |          0 |          3 |         11 |
+| /home/eli/Stakken/src/Gameplay/RenderGame.cpp                      | C++      |        184 |         14 |         68 |        266 |
+| /home/eli/Stakken/src/Gameplay/RenderGame.h                        | C++      |         42 |          1 |         19 |         62 |
+| /home/eli/Stakken/src/Gameplay/Replay.h                            | C++      |         22 |          3 |         11 |         36 |
+| /home/eli/Stakken/src/Gameplay/Tile.h                              | C++      |         21 |          0 |          2 |         23 |
+| /home/eli/Stakken/src/Globals.cpp                                  | C++      |          2 |          0 |          1 |          3 |
+| /home/eli/Stakken/src/Globals.h                                    | C++      |          3 |          0 |          1 |          4 |
+| /home/eli/Stakken/src/Main.cpp                                     | C++      |          8 |          0 |          3 |         11 |
+| /home/eli/Stakken/src/States/States.h                              | C++      |         17 |          0 |          6 |         23 |
+| /home/eli/Stakken/src/Systems/Assets/Assets.cpp                    | C++      |         14 |          0 |          5 |         19 |
+| /home/eli/Stakken/src/Systems/Assets/Assets.h                      | C++      |         99 |          3 |         34 |        136 |
+| /home/eli/Stakken/src/Systems/Assets/BGShader.cpp                  | C++      |         64 |          4 |         21 |         89 |
+| /home/eli/Stakken/src/Systems/Assets/BGShader.h                    | C++      |         15 |          0 |          3 |         18 |
+| /home/eli/Stakken/src/Systems/Assets/Font.cpp                      | C++      |         70 |          8 |         20 |         98 |
+| /home/eli/Stakken/src/Systems/Assets/Font.h                        | C++      |         28 |          1 |          9 |         38 |
+| /home/eli/Stakken/src/Systems/Assets/LinearTexture.cpp             | C++      |         20 |          3 |          6 |         29 |
+| /home/eli/Stakken/src/Systems/Assets/LinearTexture.h               | C++      |          9 |          0 |          2 |         11 |
+| /home/eli/Stakken/src/Systems/Assets/Sound.cpp                     | C++      |         16 |          0 |          6 |         22 |
+| /home/eli/Stakken/src/Systems/Assets/Sound.h                       | C++      |         11 |          0 |          3 |         14 |
+| /home/eli/Stakken/src/Systems/Assets/Texture.cpp                   | C++      |         26 |          2 |          8 |         36 |
+| /home/eli/Stakken/src/Systems/Assets/Texture.h                     | C++      |         10 |          0 |          3 |         13 |
+| /home/eli/Stakken/src/Systems/Configuration.h                      | C++      |          0 |          0 |          1 |          1 |
+| /home/eli/Stakken/src/Systems/Identity.h                           | C++      |         25 |          0 |          5 |         30 |
+| /home/eli/Stakken/src/Systems/Input/InputBuffer.h                  | C++      |         18 |          1 |          5 |         24 |
+| /home/eli/Stakken/src/Systems/Input/InputProfile.h                 | C++      |        100 |          6 |         25 |        131 |
+| /home/eli/Stakken/src/Systems/Input/KeyboardMapper.h               | C++      |         75 |          5 |         21 |        101 |
+| /home/eli/Stakken/src/Systems/Rendering/Renderer.cpp               | C++      |        492 |         32 |        133 |        657 |
+| /home/eli/Stakken/src/Systems/Rendering/Renderer.h                 | C++      |         26 |          0 |         12 |         38 |
+| /home/eli/Stakken/src/Systems/Rendering/ScreenQuad.cpp             | C++      |         28 |          0 |         10 |         38 |
+| /home/eli/Stakken/src/Systems/Rendering/ScreenQuad.h               | C++      |          5 |          0 |          0 |          5 |
+| /home/eli/Stakken/src/Systems/Rendering/Shader.cpp                 | C++      |         93 |          2 |         28 |        123 |
+| /home/eli/Stakken/src/Systems/Rendering/Shader.h                   | C++      |         17 |          0 |          4 |         21 |
+| /home/eli/Stakken/src/Systems/Rendering/gl3w.c                     | C        |        784 |         27 |         37 |        848 |
+| /home/eli/Stakken/src/Systems/TetrisAction.h                       | C++      |         13 |          0 |          1 |         14 |
+| /home/eli/Stakken/src/Systems/UI/BaseWidgets.cpp                   | C++      |         71 |          0 |         15 |         86 |
+| /home/eli/Stakken/src/Systems/UI/BaseWidgets.h                     | C++      |         10 |          0 |          2 |         12 |
+| /home/eli/Stakken/src/Systems/UI/Element.h                         | C++      |         82 |          3 |         22 |        107 |
+| /home/eli/Stakken/src/Systems/UI/Options.h                         | C++      |        196 |          9 |         51 |        256 |
+| /home/eli/Stakken/src/Systems/UI/UI.cpp                            | C++      |        109 |          6 |         34 |        149 |
+| /home/eli/Stakken/src/Systems/UI/UI.h                              | C++      |         18 |          3 |          8 |         29 |
+| Total                                                              |          |      3,731 |        184 |        902 |      4,817 |
++--------------------------------------------------------------------+----------+------------+------------+------------+------------+

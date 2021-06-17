@@ -3,15 +3,15 @@
 #include <GL/gl3w.h>
 #include <stb_image.h>
 
-Texture::Texture(const std::string& path) {
+Texture::Texture(const char* path) {
 	this->path = path;
 
 	//Load Image
 	int width, height, nrChannels;
-	unsigned char* imageData = stbi_load(path.c_str(), &width, &height, &nrChannels, 4);
+	unsigned char* imageData = stbi_load(path, &width, &height, &nrChannels, 4);
 	if (!imageData)
 	{
-		printf(("Failed to load texture: %s\n"),path.c_str());
+		printf(("Failed to load texture: %s\n"),path);
 	}
 
 	glGenTextures(1, &id);

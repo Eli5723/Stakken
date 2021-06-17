@@ -7,6 +7,8 @@ struct InputBuffer {
     TetrisAction* actions;
     int actionCount = 0;
 
+    InputBuffer(){}
+
     InputBuffer(int size){
         actions = new TetrisAction[size];
     }

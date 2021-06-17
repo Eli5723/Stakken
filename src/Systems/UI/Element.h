@@ -57,6 +57,17 @@ namespace UI {
         int flags = 0;
         ElementData data{0};
 
+        glm::vec2 resolveLocation(){
+            glm::vec2 pos = position;
+            Element* node = parent;
+            while (node){
+                pos += node->position;
+                node = node->parent;
+            }
+
+            return pos;
+        }
+
         void makeCentered(){
             position = parent->size/2.0f - size/2.0f;
         }

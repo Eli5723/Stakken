@@ -1,6 +1,6 @@
 #pragma once
-
-enum class TetrisAction {
+#include <cstdint>
+enum class TetrisAction : uint8_t {
     None,
     Left,
     Right,

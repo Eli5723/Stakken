@@ -98,4 +98,8 @@ class KeyboardMapper {
             }
         }
     }
+
+    void flush(){
+        buffer.flush();
+    }
 };

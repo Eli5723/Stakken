@@ -8,11 +8,14 @@
 #include "./Randomizers/xoroshiroRandomizer.h"
 #include "../Systems/Assets/Assets.h"
 
+#include "./Replay.h"
+
 #include <SDL2/SDL.h>
 
+#include <SDL2/SDL_log.h>
 #include <cmath>
 
-const int kInitialPieceX = 4;
+const int kInitialPieceX = 3;
 const int kInitialPieceY = 0;
 
 struct Game {
@@ -41,19 +44,37 @@ struct Game {
 	int lastPlacement;
 	int speed;
 
-	Game(InputProfile* profile) {
+	// Replay Recorder
+	Recorder* recorder = 0;
+
+	// Gameplay variables
+	int gravityTime = 300;
+	int gravityTimer = gravityTime;
+
+	Game(InputProfile* profile, int seed) {
 		this->profile = profile;
 
-		// TODO: Start Inactive
+		// TODO: Start Inactive, unseeded?
 		state = GameState::Playing;
 
 		board = new Board();
+
+		// Apply seed
+		pieceRandomizer.seed(seed);
+		holeRandomizer.seed(seed);
+		
+		if (recorder)
+			recorder->Reset(seed);
 
 		TileType firstPieceType = (TileType)(pieceRandomizer.next()%7);
 		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
 
 		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, firstPieceType, profile->rotation[firstPieceType]);
 		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+
+		// Configuration
+		gravityTime = 300;
+		gravityTimer = gravityTime;
 
 		// Stats
 		time = 0;
@@ -63,7 +84,18 @@ struct Game {
 		speed = 0;
 	}
 
-	void Reset(){
+	void Reset( int seed){
+		pieceRandomizer.seed(seed);
+		holeRandomizer.seed(seed);
+		
+		if (recorder)
+			recorder->Reset(seed);
+
+		time = 0;
+		clears = 0;
+		pieces = 0;
+		lastPlacement = 0;
+		speed = 0;
 		board->clear();
 		TileType firstPieceType = (TileType)(pieceRandomizer.next()%7);
 		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
@@ -75,6 +107,8 @@ struct Game {
 		time = 0;
 		clears = 0;
 		pieces = 0;
+		lastPlacement = 0;
+		speed = 0;
 	}
 
 	void Win(){
@@ -91,69 +125,98 @@ struct Game {
 	}
 
 	void Update(int dt){
+		if (recorder)
+			recorder->advance(dt);
+
 		time += dt;
+
+		gravityTimer -= dt;
+		while (gravityTimer <= 0){
+			heldPiece->moveDown();
+			if (!board->checkFit(heldPiece)){
+				heldPiece->moveUp();
+				ApplyHeldPiece();
+			}
+
+			gravityTimer += gravityTime;
+		}
 	}
 
 	void ApplyInput(InputBuffer& input){
-		if (input.actionCount > 0)
-		for (int i=0; i < input.actionCount; i++){
-			switch(input.actions[i]){
-				case TetrisAction::Left:
-					heldPiece->moveLeft();
-					if (!board->checkFit( heldPiece )) {
-						heldPiece->moveRight();
-					}
-				break;
+		if (recorder)
+			recorder->record(input);
 
-				case TetrisAction::Right:
-					heldPiece->moveRight();
-					if (!board->checkFit( heldPiece ))
+
+		if (input.actionCount > 0) {
+			for (int i=0; i < input.actionCount; i++){
+				switch(input.actions[i]){
+					case TetrisAction::Left:
 						heldPiece->moveLeft();
-				break;
+						if (!board->checkFit( heldPiece )) {
+							heldPiece->moveRight();
+						}
+					break;
 
-				case TetrisAction::SoftDrop:
-					heldPiece->moveDown();
-					if (!board->checkFit(heldPiece)){
+					case TetrisAction::Right:
+						heldPiece->moveRight();
+						if (!board->checkFit( heldPiece ))
+							heldPiece->moveLeft();
+					break;
+
+					case TetrisAction::SoftDrop:
+						heldPiece->moveDown();
+						if (!board->checkFit(heldPiece)){
+							heldPiece->moveUp();
+						} else {
+							gravityTimer = gravityTime;
+						}
+					break;
+
+					case TetrisAction::SonicDrop: {
+						int distance = 0;
+
+						while (board->checkFit(heldPiece)){
+							heldPiece->moveDown();
+							distance++;
+						}
+						heldPiece->moveUp();
+
+						// Prevent stalling
+						if (distance > 1){
+							gravityTimer = gravityTime;
+						}
+					} break;
+
+					case TetrisAction::HardDrop:
+						while (board->checkFit(heldPiece))
+							heldPiece->moveDown();
 						heldPiece->moveUp();
 						ApplyHeldPiece();
-					}
-				break;
+					break;
 
-				case TetrisAction::SonicDrop:
-					while (board->checkFit(heldPiece)){
-						heldPiece->moveDown();
-					}
-					heldPiece->moveUp();
-				break;
-
-				case TetrisAction::HardDrop:
-					while (board->checkFit(heldPiece))
-						heldPiece->moveDown();
-					heldPiece->moveUp();
-					ApplyHeldPiece();
-				break;
-
-				case TetrisAction::Flip:
-					heldPiece->flip();
-					if (!board->offsetTest(heldPiece))
+					case TetrisAction::Flip:
 						heldPiece->flip();
-				break;
+						if (!board->offsetTest(heldPiece))
+							heldPiece->flip();
+					break;
 
-				case TetrisAction::RCW:
-					heldPiece->rotateCW();
-					if (!board->offsetTest(heldPiece))
-						heldPiece->rotateCCW();
-				break;
-
-				case TetrisAction::RCCW:
-					heldPiece->rotateCCW();
-					if (!board->offsetTest(heldPiece))
+					case TetrisAction::RCW:
 						heldPiece->rotateCW();
-				break;
+						if (!board->offsetTest(heldPiece))
+							heldPiece->rotateCCW();
+					break;
 
-				case TetrisAction::None:
-				default:
-				break;
+					case TetrisAction::RCCW:
+						heldPiece->rotateCCW();
+						if (!board->offsetTest(heldPiece))
+							heldPiece->rotateCW();
+					break;
+
+					case TetrisAction::None:
+					default:
+					SDL_LogWarn(0, "Game recieved malformed input!");
+					break;
+				}
 			}
 		}
 	}

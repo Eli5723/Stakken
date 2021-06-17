@@ -19,6 +19,7 @@ namespace UI {
     void clearFocus();
 
     void moveCapture(const SDL_MouseMotionEvent& event);
+    void SetIgnoreMovement();
     void endDrag();
 
     // Recursively render widgets

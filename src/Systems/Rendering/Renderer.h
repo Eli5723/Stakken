@@ -13,9 +13,10 @@
 class Renderer {
 public:
 	static void Init(const glm::vec2& resolution);
-	static void SetResolution(const glm::vec2& resoltion);
-	static void SetView(const glm::vec2& position, float scale, int id);
-	static void TargetView(int target);
+	
+	static void TargetTransform(int target);
+	static void UpdateProjection(const glm::mat4& projection);
+	static void UpdateTransform(const glm::mat4& projection,int id);
 
 	static void Shutdown();
 

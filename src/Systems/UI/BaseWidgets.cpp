@@ -27,7 +27,7 @@ namespace UI {
 
     Element* TextInput(){
         Element* textBox = new Element;
-        textBox->flags = Flags::border | Flags::text | Flags::background;
+        textBox->flags = Flags::border | Flags::text;
         textBox->clickCallback = [](int x,int y){ printf("starting text input\n");SDL_StartTextInput();};
         const int limit = 40;
         textBox->data.text = new char[limit+1];
@@ -54,7 +54,7 @@ namespace UI {
 
     Element* NumberInput(int &target){
         Element* textBox = new Element;
-        textBox->flags = Flags::border | Flags::text | Flags::background;
+        textBox->flags = Flags::border | Flags::text;
         textBox->clickCallback = [](int x,int y){SDL_StartTextInput();};
         const int limit = 40;
         textBox->data.text = new char[limit+1];

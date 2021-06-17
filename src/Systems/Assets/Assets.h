@@ -78,9 +78,10 @@ class AssetCache {
 
 	public:
 	//Load file if it hasn't been loaded already, otherwise return the cached item
-	type* get(const string& path) {
+	type* get(const char* path) {
 
-		auto iter = loadedFiles.find(path);
+		string pathStr = path;
+		auto iter = loadedFiles.find(pathStr);
 
 		if (iter == loadedFiles.end()) {
 			type* toLoad = new type(path);
@@ -112,6 +113,15 @@ struct ActiveAssets {
     BGShader* bgShader;
 	Font* font;
 	
+	int currentPieceTexture = 0;
+	void nextPieceTexture(){currentPieceTexture = (currentPieceTexture + 1)%textureList.files.size(); pieceTexture = textureCache.get(textureList.files[currentPieceTexture].c_str());}
+	
+	int currentShader = 0;
+	void nextShader(){currentShader = (currentShader + 1)%shaderList.files.size(); bgShader = shaderCache.get(shaderList.files[currentShader].c_str());}
+
+	int currentFont = 0;
+	void nextFont(){currentFont = (currentFont + 1)%fontList.files.size(); font = fontCache.get(fontList.files[currentFont].c_str());}
+
 	Sound* sound_lineclear = 0;
     Sound* sound_sonicdrop = 0;
     Sound* sound_harddrop = 0;

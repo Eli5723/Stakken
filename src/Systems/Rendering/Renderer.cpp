@@ -221,23 +221,15 @@ void Renderer::Init(const glm::vec2& resolution) {
 	}
 }
 
-void Renderer::TargetView(int target){
+void Renderer::TargetTransform(int target){
 	s_Data.currentView = target;
 }
 
-void Renderer::SetResolution(const glm::vec2& resolution) {
-		s_Data.quadShader->use();
-
-	glm::mat4 projection = glm::ortho(0.0f,resolution.x,resolution.y,0.0f);
+void Renderer::UpdateProjection(const glm::mat4& projection){
 	s_Data.quadShader->setMat4("u_projection", projection);
 }
 
-void Renderer::SetView(const glm::vec2& position, float scale, int id) {
-	s_Data.quadShader->use();
-	glm::mat4 transform = glm::mat4(1);
-	transform = glm::scale(transform,{scale,scale,1.0f});
-	transform = glm::translate(transform,glm::vec3{position.x/scale,position.y/scale,0});
-
+void Renderer::UpdateTransform(const glm::mat4& transform,int id){
 	s_Data.quadShader->setMat4Offset("u_transform[0]", transform, id);
 }
 

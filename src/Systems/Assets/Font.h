@@ -31,8 +31,8 @@ struct Font {
 
     Glyph glyphs[255];
 
-    Font(const std::string& path);
+    Font(const char* path);
 
     // Generates an atlas for a font if one has not been saved yet
-    void GenerateAtlas(const std::string& path);
+    void GenerateAtlas(const char* path);
 };

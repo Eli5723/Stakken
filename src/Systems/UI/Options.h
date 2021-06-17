@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../Globals.h"
+
 #include "../Assets/Assets.h"
 
 #include "./UI.h"
@@ -9,6 +11,7 @@
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_mouse.h>
 #include <cstdlib>
 #include <glm/fwd.hpp>
 #include <string>
@@ -44,7 +47,7 @@ const std::string labels[] = {
 
 Element* Options(InputProfile* profile, Identity* identity){
     Element* base = new Element;
-    base->size = {200.0f + RenderGame::kPieceDimensions.x * 4,32.0f*11};
+    base->size = {200.0f + RenderGame::kPieceDimensions.x * 4,32.0f*12};
     base->flags = Flags::background | Flags::border;
 
     Element* list = new Element;
@@ -61,7 +64,7 @@ Element* Options(InputProfile* profile, Identity* identity){
 
         Element* button = new Element;
         button->flags = Flags::texture | Flags::border;
-        button->data.texture = textureCache.get("./Resources/Textures/Icons/" + icons[i] + ".png");
+        button->data.texture = textureCache.get(("./Resources/Textures/Icons/" + icons[i] + ".png").c_str());
         button->position = {0.0f, i * 32.0f};
         button->size = {32.0f, 32.0f};
         
@@ -87,7 +90,7 @@ Element* Options(InputProfile* profile, Identity* identity){
 
     Element* dasIcon = new Element;
     dasIcon->flags = Flags::texture | Flags::border;
-    dasIcon->data.texture = textureCache.get("./Resources/Textures/Icons/" + icons[8] + ".png");
+    dasIcon->data.texture = textureCache.get(("./Resources/Textures/Icons/" + icons[8] + ".png").c_str());
     dasIcon->position = {0.0f, 8 * 32.0f};
     dasIcon->size = {32.0f, 32.0f};
     list->addChild(dasIcon);
@@ -99,7 +102,7 @@ Element* Options(InputProfile* profile, Identity* identity){
 
     Element* arrIcon = new Element;
     arrIcon->flags = Flags::texture | Flags::border;
-    arrIcon->data.texture = textureCache.get("./Resources/Textures/Icons/" + icons[9] + ".png");
+    arrIcon->data.texture = textureCache.get(("./Resources/Textures/Icons/" + icons[9] + ".png").c_str());
     arrIcon->position = {0.0f, 9 * 32.0f};
     arrIcon->size = {32.0f, 32.0f};
     list->addChild(arrIcon);
@@ -111,7 +114,7 @@ Element* Options(InputProfile* profile, Identity* identity){
 
     Element* dropArrIcon = new Element;
     dropArrIcon->flags = Flags::texture | Flags::border;
-    dropArrIcon->data.texture = textureCache.get("./Resources/Textures/Icons/" + icons[10] + ".png");
+    dropArrIcon->data.texture = textureCache.get(("./Resources/Textures/Icons/" + icons[10] + ".png").c_str());
     dropArrIcon->position = {0.0f, 10 * 32.0f};
     dropArrIcon->size = {32.0f, 32.0f};
     list->addChild(dropArrIcon);
@@ -153,7 +156,6 @@ Element* Options(InputProfile* profile, Identity* identity){
         h->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
             //Initializes a static float for each color table entry to the hue of that entry
             hue[i] = hue[i] + event.yrel*2;
-
             HSV2RGB(hue[i],saturation[i],value[i], identity->color_table.entries[i]);
         };
 
@@ -191,18 +193,57 @@ Element* Options(InputProfile* profile, Identity* identity){
 
     pieceRoot->position = {list->size.x,0};
     pieceRoot->size = {RenderGame::kPieceDimensions.x * 4,list->size.y};
-    pieceRoot->flags = Flags::background | border;
+    pieceRoot->flags = border;
 
     // Graphical Options
     base->addChild(pieceRoot);
     
 
     Element* graphicsOptions = new Element;
-    graphicsOptions->flags = Flags::border | Flags::background;
-    graphicsOptions->size = { base->size.x,100.0f };
+    graphicsOptions->flags = Flags::border;
+    graphicsOptions->size = { base->size.x,32.0f };
     graphicsOptions->position = { 0,list->size.y };
-
     base->addChild(graphicsOptions);
+
+    Element* shaderButton = new Element;
+    shaderButton->flags = Flags::border | Flags::text;
+    shaderButton->size = {128,32};
+    shaderButton->data.text = "Shader (F5)";
+    shaderButton->clickCallback = [](int x, int y){
+        activeAssets.nextShader();
+    };
+    graphicsOptions->addChild(shaderButton);
+
+    Element* pieceTextureButton = new Element;
+    pieceTextureButton->flags = Flags::border | Flags::text;
+    pieceTextureButton->size = {128,32};
+    pieceTextureButton->position = {128,0};
+    pieceTextureButton->data.text = "Piece Texture (F6)";
+    pieceTextureButton->clickCallback = [](int x, int y){
+        activeAssets.nextPieceTexture();
+    };
+    graphicsOptions->addChild(pieceTextureButton);
+
+    Element* font = new Element;
+    font->flags = Flags::border | Flags::text;
+    font->size = {128,32};
+    font->position = {256,0};
+    font->data.text = "Font (F7)";
+    font->clickCallback = [](int x, int y){
+        activeAssets.nextFont();
+    };
+    graphicsOptions->addChild(font);
+
+    Element* outlineStyleButton = new Element;
+    outlineStyleButton->flags = Flags::border | Flags::text;
+    outlineStyleButton->size = {128,32};
+    outlineStyleButton->position = {384,0};
+    outlineStyleButton->data.text = "Outline Style (F8)";
+    outlineStyleButton->clickCallback = [](int x, int y){
+        RenderGame::cycleOutlineStyles();
+    };
+    graphicsOptions->addChild(outlineStyleButton);
+
 
     return base;
 }

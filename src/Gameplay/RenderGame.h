@@ -20,7 +20,10 @@ namespace RenderGame {
 
     struct Options {
         int outlineStyle = OutlineStyle::TGM;
+        float backgroundOpacity = .8f;
     };
+
+    void cycleOutlineStyles();
 
     extern Options options;
 

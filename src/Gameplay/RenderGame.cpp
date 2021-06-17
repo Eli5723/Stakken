@@ -14,7 +14,14 @@ inline int min(int x){
 
 namespace RenderGame {
 
-    Options options;
+    Options options{
+        .outlineStyle = OutlineStyle::TGM,
+        .backgroundOpacity = .9f
+    };
+
+    void cycleOutlineStyles(){
+         options.outlineStyle = (RenderGame::options.outlineStyle + 1) % RenderGame::kOutlineStyles;
+    }
     
     float kMargin = 2.0f;
     float kGaps = 16.0f;
@@ -137,10 +144,11 @@ namespace RenderGame {
         for (int y=0; y < 4; y++){
             for (int x = 0; x < 4; x++){
                 if (piece.tileAt(x,y) != TileType::Empty) {
+                    // Because the background of the board is black, we can get away with tinting the ghost piece a darker shade to "cheat" the transparency. This feels better when the background of the board is not opaque
                     if (texture)
-                        Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture->id, identity.color_table.entries[piece.type] * glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});
+                        Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, texture->id, identity.color_table.entries[piece.type] * glm::vec4{.5f, .5f, .5f, 1.0f});
                     else
-                        Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, identity.color_table.entries[piece.type] * glm::vec4{1.0f, 1.0f, 1.0f, 0.5f});;
+                        Renderer::DrawQuad(position + glm::vec2{kTileSize * x, kTileSize * y}, kTileDimensions, identity.color_table.entries[piece.type] * glm::vec4{.5f, .5f, .5f, 1.0f});;
 
                 }
             }
@@ -150,7 +158,7 @@ namespace RenderGame {
     void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture* texture){
         // Draw "Board" background + Border
         Renderer::QuadBox(position, kBoardDimensions, pixelThickness, {1,1,1,1});
-        Renderer::DrawQuad(position, kBoardDimensions, {0,0,0,1});
+        Renderer::DrawQuad(position, kBoardDimensions, {0,0,0,options.backgroundOpacity});
 
         //Draw Tiles
         for (int y = Board::kOverflowRows; y < Board::kTotalRows; y++){
@@ -232,7 +240,7 @@ namespace RenderGame {
         // Draw Next Piece Preview
         const glm::vec2 previewPosition = boardPosition  + kPreviewOffset;
         Renderer::QuadBox(previewPosition, kPieceDimensions, pixelThickness, {1,1,1,1});
-        Renderer::DrawQuad(previewPosition, kPieceDimensions, {0,0,0,1});
+        Renderer::DrawQuad(previewPosition, kPieceDimensions, {0,0,0,options.backgroundOpacity});
         DrawPiece(previewPosition, *game.nextPiece, identity, texture);
 
         // END OF GAMEPLAY
@@ -245,7 +253,7 @@ namespace RenderGame {
         // Draw Game Stats
         const glm::vec2 statsPosition = previewPosition + glm::vec2{0,kGaps + kPieceDimensions.y};
         Renderer::QuadBox(statsPosition, kStatsDimensions, pixelThickness, {1,1,1,1});
-        Renderer::DrawQuad(statsPosition, kStatsDimensions, {0,0,0,1});
+        Renderer::DrawQuad(statsPosition, kStatsDimensions, {0,0,0,options.backgroundOpacity});
         
         char stats[50];
         float bpm = (float)game.pieces/((float)game.time/60000.0f);

@@ -10,7 +10,7 @@ class BGShader {
         static void Init();
 
         GLuint ID;
-        BGShader(const std::string& path);
+        BGShader(const char* path);
         void use();
         void setVec2(const char* name, float* value);
         void setFloat(const char* name, GLfloat value);

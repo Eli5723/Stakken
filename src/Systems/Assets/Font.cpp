@@ -1,4 +1,5 @@
 #include "Font.h"
+#include <SDL2/SDL_log.h>
 
 inline void stamp(u8* target, u8* source, int x, int y, int width, int height, int stride) {
     for (int i = 0; i < width; i++){
@@ -9,7 +10,7 @@ inline void stamp(u8* target, u8* source, int x, int y, int width, int height, i
 }
 
 
-Font::Font(const std::string& path){
+Font::Font(const char* path){
     this->path = path;
 
     // TODO: Atlas Cache
@@ -17,9 +18,14 @@ Font::Font(const std::string& path){
 }
 
 // Generates an atlas for a font if one has not been saved yet
-void Font::GenerateAtlas(const std::string& path){
+void Font::GenerateAtlas(const char* path){
     
-    unsigned const char* fontFile = slurpuc(path.c_str());
+    unsigned const char* fontFile = slurpuc(path);
+    if (!fontFile){
+        SDL_LogWarn(0, "Failed to load font %s", path);
+        return;
+    }
+
 
     static stbtt_fontinfo* fontInfo = new stbtt_fontinfo;
     stbtt_InitFont(fontInfo, fontFile,0);
@@ -38,7 +44,7 @@ void Font::GenerateAtlas(const std::string& path){
     }
 
     if (totalWidth == 0 || maxHeight == 0) {
-        SDL_LogWarn(SDL_LOG_CATEGORY_INPUT, "Failed to load font: %s", path.c_str());
+        SDL_LogWarn(SDL_LOG_CATEGORY_INPUT, "Failed to load font: %s", path);
         return;
     }
 

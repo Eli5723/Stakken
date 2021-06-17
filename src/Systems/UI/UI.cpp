@@ -2,6 +2,8 @@
 
 #include "../Assets/Assets.h"
 #include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_stdinc.h>
 
 namespace UI {
 
@@ -10,7 +12,11 @@ namespace UI {
 
         Element* focus = 0;
         Element* drag = 0;
+        glm::vec2 dragStartingPosition;
+
+        bool ignoreMovement = 0;
     } s_Data;
+
 
     // UI driver functions
     void Init(const glm::vec2& resolution){
@@ -36,8 +42,7 @@ namespace UI {
         if (child){
             while (child != nullptr){
                 //Propogate clicks to the lowest hit element in the chain
-                if (x >= child->position.x && x <= child->position.x + child->size.x && y >= child->position.y && y <= child->position.y + child->size.y) {
-                    printf("test: %i,%i\n", x, y);
+                if ((child->flags & Flags::structural) || (x >= child->position.x && x <= child->position.x + child->size.x && y >= child->position.y && y <= child->position.y + child->size.y)) {
                     return click(child,x - child->position.x, y - child->position.y);
                 }
 
@@ -48,7 +53,10 @@ namespace UI {
                 current->clickCallback(x,y);
                 return current;
             } else if (current->moveCallback){
+                // Used to hide the cursor while dragging so that the user can focus
+                SDL_SetRelativeMouseMode(SDL_TRUE);
                 s_Data.drag = current;
+                s_Data.dragStartingPosition = current->resolveLocation() + glm::vec2{x,y};
             }
         }
         return clicked;
@@ -74,11 +82,25 @@ namespace UI {
     }
 
     void moveCapture(const SDL_MouseMotionEvent& event){
+        if (s_Data.ignoreMovement){
+            s_Data.ignoreMovement = false;
+            return;
+        }
+
         if (s_Data.drag && s_Data.drag->moveCallback)
             s_Data.drag->moveCallback(event);
     }
 
+    void SetIgnoreMovement() {
+        s_Data.ignoreMovement = true;
+    };
+
     void endDrag(){
+        if (s_Data.drag){
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+            SDL_WarpMouseInWindow(0, s_Data.dragStartingPosition.x, s_Data.dragStartingPosition.y);
+        }
+
         s_Data.drag = 0;
     }
 
@@ -98,7 +120,7 @@ namespace UI {
             const glm::vec2 offset = baseOffset + node->position;
 
             if (node->flags & Flags::background)
-                Renderer::DrawQuad(offset ,node->size, {0,0,0,1});
+                Renderer::DrawQuad(offset ,node->size, {0,0,0,.9f});
 
             if (node->flags & Flags::border)
                 Renderer::QuadBox(offset ,node->size,1.0f, {1,1,1,1});
