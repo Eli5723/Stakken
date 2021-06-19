@@ -18,6 +18,21 @@ struct ReplayMapper {
         buffer.actionCount = 0;
     } 
 
+    void reset(){
+        time = 0;
+        frame = 0;
+        buffer.actions = &replay.actions[0];
+        buffer.actionCount = 0;
+    }
+
+    void setReplay(Replay& replay){
+        this->replay = replay;
+        frame = 0;
+        time = 0;
+        buffer.actions = &replay.actions[0];
+        buffer.actionCount = 0;
+    }
+
     void update(int dt) {
 
         time += dt;

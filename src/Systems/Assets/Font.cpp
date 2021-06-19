@@ -31,7 +31,7 @@ void Font::GenerateAtlas(const char* path){
     stbtt_InitFont(fontInfo, fontFile,0);
     
     // Calculate Atlas Size
-    float scale = stbtt_ScaleForPixelHeight(fontInfo, 32);
+    float scale = stbtt_ScaleForPixelHeight(fontInfo, 64);
     int totalWidth = 0;
     int maxHeight = 0;
     int x0,y0,x1,y1, width, height;

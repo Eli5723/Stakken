@@ -18,6 +18,7 @@ using std::vector;
 #include <glm/glm.hpp>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#include <eutility.h>
 
 #include "./Globals.h"
 #include "./Systems/Configuration.h"
@@ -41,6 +42,7 @@ using std::vector;
 
 #include "./Gameplay/Replay.h"
 #include "./Systems/Input/ReplayMapper.h"
+#include "./Gameplay/ReplayViewer.h"
 
 #include <cstdio>
 #include <time.h>
@@ -61,8 +63,7 @@ struct CientState {
     KeyboardMapper* keyboard;
 
 
-    Game* secondGame;
-    ReplayMapper* replayMapper;
+    ReplayViewer* replayViewer;
 
     UI::Element* optionsUI;
 
@@ -76,6 +77,8 @@ OnInit(){
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         return false;
     }
+
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
     // Initialize Graphics
     gl3wInit();
@@ -127,13 +130,17 @@ OnInit(){
     clientState.optionsUI->position = {RenderGame::kGameDimensions.x + RenderGame::kGaps, 100.0f};
 
 
-    // Replay Test
+    // The main board always has a replay player
     clientState.game->recorder = new Recorder();
 
-    Replay* testReplay = new Replay("./Replays/test.rep");
-    clientState.secondGame = new Game(clientState.inputProfile,testReplay->seed);
-    clientState.replayMapper = new ReplayMapper(*testReplay);
     
+
+    Replay* testReplay = new Replay("./Replays/DEMO.rep");
+    Game* secondGame = new Game(clientState.inputProfile,testReplay->seed);
+    ReplayMapper* replayMapper = new ReplayMapper(*testReplay);
+    
+    ReplayViewer* viewer = new ReplayViewer(*testReplay,*replayMapper, *secondGame);
+    clientState.replayViewer = viewer;
 
     return true;
 }
@@ -176,12 +183,7 @@ OnLoop(int dt){
         clientState.game->Update(dt);
     }
 
-    if (clientState.secondGame->state == Game::GameState::Playing) {
-        clientState.replayMapper->update(dt);
-        clientState.secondGame->ApplyInput(clientState.replayMapper->buffer);
-        clientState.replayMapper->flush();
-        clientState.secondGame->Update(dt);
-    }
+    clientState.replayViewer->advance(dt);
 }
 
 void 
@@ -201,7 +203,7 @@ OnRender(int dt){
     RenderGame::DrawGame({RenderGame::kGaps,64.0f},*clientState.game,*clientState.identity, activeAssets.pieceTexture);
 
 
-    RenderGame::DrawGame({GameResolution.x - RenderGame::kGaps - RenderGame::kGameDimensions.x,64.0f},*clientState.secondGame,*clientState.identity, activeAssets.pieceTexture);
+    RenderGame::DrawGame({GameResolution.x - RenderGame::kGaps - RenderGame::kGameDimensions.x,64.0f},clientState.replayViewer->game,*clientState.identity, activeAssets.pieceTexture);
 
 
     UI::Render();
@@ -248,6 +250,22 @@ OnEvent(const SDL_Event& event){
     case SDL_TEXTINPUT:
         OnTextInput(event.text);
     break;
+
+    case SDL_DROPFILE:{
+        printf("File path: %s\n", event.drop.file);
+        /*
+        Replay* testReplay = new Replay(event.drop.file);
+        clientState.secondGame->Reset(testReplay->seed);
+        clientState.replayMapper->setReplay(*testReplay);
+
+        //= new Game(clientState.inputProfile,testReplay->seed);
+        clientState.replayMapper = new ReplayMapper(*testReplay);
+        clientState.secondGame->state = Game::GameState::Playing;
+
+        */
+        SDL_free(event.drop.file);
+    }break;
+
     default:
     break;
     }
@@ -281,6 +299,14 @@ OnInput(const SDL_KeyboardEvent& key){
     
     // Function keys
     switch (key.keysym.scancode){
+        case SDL_SCANCODE_LEFT:
+            clientState.replayViewer->rewind(500);
+        break;
+        case SDL_SCANCODE_RIGHT:
+            clientState.replayViewer->advance(500);
+        break;
+
+
         case SDL_SCANCODE_F1:
             clientState.optionsUI->enabled = !clientState.optionsUI->enabled;
         return;
@@ -288,6 +314,10 @@ OnInput(const SDL_KeyboardEvent& key){
         case SDL_SCANCODE_F2:
             clientState.game->Reset(clock());
             clientState.game->state = Game::GameState::Playing;        
+            return;
+        break;
+        case SDL_SCANCODE_F3:
+            clientState.game->Lose();        
             return;
         break;
         case SDL_SCANCODE_F5:
@@ -303,10 +333,15 @@ OnInput(const SDL_KeyboardEvent& key){
             RenderGame::cycleOutlineStyles();
         break;
 
-        case SDL_SCANCODE_F9:
-        if (clientState.game->recorder)
-            clientState.game->recorder->save(" ");
-        break;
+        // Save replay of current game with the path being the current timestamp
+        case SDL_SCANCODE_F9: {
+            char* replayName = timestring();
+
+            if (clientState.game->recorder)
+                clientState.game->recorder->save(replayName);
+
+            delete [] replayName;
+        } break;
         
         default:
         break;

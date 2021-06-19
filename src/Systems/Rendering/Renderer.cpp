@@ -436,7 +436,7 @@ void Renderer::BlackBox(const glm::vec2& position, const glm::vec2& size, const 
 }
 
 void Renderer::DrawStr(const glm::vec2& position,float scale, const std::string& str, Font* font) {
-
+	scale *= .5f;
 	//If we run out of indices or textures slots, draw everything and reset the buffers
 	if (s_Data.IndexCount + str.length()*6 >= MaxIndexCount || s_Data.TextureSlotIndex > 31) {
 		EndBatch();
@@ -515,6 +515,7 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, const std::string&
 }
 
 void Renderer::DrawStrC(const glm::vec2& position,float scale, const std::string &str, Font* font) {
+	scale *= .5f;
 
 	//If we run out of indices or textures slots, draw everything and reset the buffers
 	if (s_Data.IndexCount + str.length()*6 >= MaxIndexCount || s_Data.TextureSlotIndex > 31) {

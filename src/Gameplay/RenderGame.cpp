@@ -156,8 +156,7 @@ namespace RenderGame {
     }
 
     void DrawBoard(const glm::vec2& position, Board& board, Identity& identity, Texture* texture){
-        // Draw "Board" background + Border
-        Renderer::QuadBox(position, kBoardDimensions, pixelThickness, {1,1,1,1});
+        // Background
         Renderer::DrawQuad(position, kBoardDimensions, {0,0,0,options.backgroundOpacity});
 
         //Draw Tiles
@@ -174,20 +173,20 @@ namespace RenderGame {
                         Renderer::DrawQuad(tilePosition, kTileDimensions, identity.color_table.entries[(int)type]);
 
                     if (options.outlineStyle == 1) {
-                        // Cultris Style Outlines
+                    // Cultris Style Outlines
                         const Connection connections = board.connectionAt(x, y);
-
+                        glm::vec4 outlineColor = identity.color_table.entries[(int)type] * glm::vec4{1.5f,1.5f,1.5,1}; 
                         if ((connections & Side::Up) ^ Side::Up)
-                            Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize+1,1},{1,1,1,1});
+                            Renderer::DrawQuad(tilePosition + glm::vec2{0,-1},glm::vec2{kTileSize+1,1},outlineColor);
                         
                         if ((connections & Side::Down) ^ Side::Down)
-                            Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize},glm::vec2{kTileSize,1},{1,1,1,1});
+                            Renderer::DrawQuad(tilePosition + glm::vec2{0,kTileSize},glm::vec2{kTileSize,1},outlineColor);
 
                         if ((connections & Side::Left) ^ Side::Left)
-                            Renderer::DrawQuad(tilePosition,glm::vec2{1,kTileSize},{1,1,1,1});
+                            Renderer::DrawQuad(tilePosition,glm::vec2{1,kTileSize},outlineColor);
 
                         if ((connections & Side::Right) ^ Side::Right)
-                            Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize,0},glm::vec2{1,kTileSize+1},{1,1,1,1}); 
+                            Renderer::DrawQuad(tilePosition + glm::vec2{kTileSize,0},glm::vec2{1,kTileSize+1},outlineColor); 
                     } else if (options.outlineStyle == 2) {
                     // TGM Style Outlines
                         if (board.tileAt(x,y-1) == TileType::Empty)
@@ -205,6 +204,9 @@ namespace RenderGame {
                 }
             }
         }
+
+        // Border
+        Renderer::QuadBox(position, kBoardDimensions, pixelThickness, {1,1,1,1});
     }
 
     void DrawGame(const glm::vec2& position, Game& game, Identity& identity, Texture* texture){
@@ -257,8 +259,8 @@ namespace RenderGame {
         
         char stats[50];
         float bpm = (float)game.pieces/((float)game.time/60000.0f);
-        sprintf(stats,"Time: %.2f\nClears:%i\nPieces:%i\nBPM:%.0f",(float)game.time/1000.0f,game.clears,game.pieces, bpm);
-        Renderer::DrawStr(statsPosition, 0.5f, stats, activeAssets.font);
+        sprintf(stats,"Time:\n%.2f\nClears:\n%i\nPieces:\n%i",(float)game.time/1000.0f,game.clears,game.pieces);
+        Renderer::DrawStr(statsPosition, 1.0f, stats, activeAssets.font);
         
         // Speedometer
         char bpmStr[5];

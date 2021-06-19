@@ -10,5 +10,8 @@ enum class TetrisAction : uint8_t {
     RCW,
     RCCW,
     Flip,
+
+    Gravity,
     RemoveRow,
+    AddRow
 };

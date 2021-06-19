@@ -4,9 +4,11 @@
 
 #include "Board.h"
 
+#include <cstdlib>
 #include <memory>
 #include <vector>
 #include <cstdio>
+#include <cstring>
 
 using std::vector;
 
@@ -20,6 +22,8 @@ struct ReplayFrame {
 struct Recorder {
     vector<TetrisAction> actions;
     vector<ReplayFrame> frames;
+
+    int frameActions = 0;
 
     int time;
     int seed;
@@ -35,14 +39,21 @@ struct Recorder {
 
         this->seed = seed;
         time = 0;
+        frameActions = 0;
     }
 
-    void record(InputBuffer& inputs){
-        if (inputs.actionCount == 0)
-            return;
-        frames.push_back({inputs.actionCount,time});
-        for (int i = 0; i < inputs.actionCount; i++)
-            actions.push_back(inputs.actions[i]);
+    // Records an action
+    inline void record(TetrisAction action){
+        actions.push_back(action);
+        frameActions++;
+    }
+
+    // Submits a full frame if it contains actions
+    void saveFrame(){
+        if (frameActions > 0) {
+            frames.push_back({frameActions,time});
+            frameActions = 0;
+        }
     }
 
     void advance (int dt){
@@ -56,8 +67,13 @@ struct Recorder {
     //  action count, time
     //  actions
 
-    void save(char* path) {
-        FILE * file = fopen("./Replays/test.rep","wb");
+    void save(char* name) {
+        char* path = new char[255];
+        strcpy(path,"./Replays/");
+        strcat(path,name);
+        strcat(path,".rep");
+
+        FILE * file = fopen(path,"wb");
 
         std::fprintf(file, "%u %u\n", seed, (int)frames.size());
         
@@ -78,6 +94,7 @@ struct Recorder {
         fclose(file);
 
         printf("Saved replay to: %s\n", path);
+        delete[] path;
     }
 };
 
