@@ -17,7 +17,6 @@ struct State {
 
     void OnClick(const SDL_Event& event);
     void OnTextInput(const SDL_TextInputEvent& input);
-    void OnResize(int width, int height);
 
     void OnCleanup();
 };

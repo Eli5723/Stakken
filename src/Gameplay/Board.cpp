@@ -102,6 +102,8 @@ void Board::addLine(int hole) {
 	// Create a hole and remove relavent connections
 	garbageRow->contents[hole] = -1;
 
+	garbageRow->fill = kWidth -1;
+
 	if (rows[kTota - 2]->contents[hole] == TileType::Empty)
 		rows[kTota - 2]->connections[hole] &= ~Side::Down;
 

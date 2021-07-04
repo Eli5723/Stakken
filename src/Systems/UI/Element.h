@@ -14,9 +14,6 @@
 #include "../../Gameplay/RenderGame.h"
 
 namespace UI {
-    typedef void (*ClickCallback)(int, int);
-    typedef void (*MouseOver)();
-
     enum Flags {
         none = 0,
         border = 1,
@@ -52,7 +49,7 @@ namespace UI {
         std::function<void(int,int)> clickCallback;
         std::function<void(const SDL_KeyboardEvent&)> keyCallback;
         std::function<void(const SDL_TextInputEvent&)> textCallback;
-        std::function<void(const SDL_MouseMotionEvent&)> moveCallback;
+        std::function<void(const SDL_MouseMotionEvent&)> dragCallback;
 
         int flags = 0;
         ElementData data{0};
@@ -84,7 +81,7 @@ namespace UI {
 
         // Data assignment functions
         void setText(const char* source){
-            flags = Flags::text;
+            flags |= Flags::text;
             if (data.text)
                 delete [] data.text;
 

@@ -51,8 +51,9 @@ const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 
 glm::vec2 GameResolution = {1280.0f,720.0f};
-
 glm::vec2 Resolution{WINDOW_WIDTH,WINDOW_HEIGHT};
+float scaleFactor;
+glm::vec2 offset;
 
 bool Running = true;
 
@@ -109,9 +110,6 @@ OnInit(){
 
     //Load configuration
     loadConfiguration();
-    // activeAssets.bgShader = shaderCache.get(shaderList.files[0].c_str());
-    // activeAssets.pieceTexture = 0;//textureCache.get(textu;reList.files[5])
-    // activeAssets.font =  fontCache.get(fontList.files[1].c_str());
 
     activeAssets.sound_lock = soundCache.get("./Resources/Sounds/place.wav");
     activeAssets.sound_lineclear = soundCache.get("./Resources/Sounds/clear.WAV");
@@ -163,8 +161,8 @@ OnExecute(){
            OnEvent(event);
         }
 
-        OnLoop(frameDelta);
-        OnRender(frameDelta);
+        OnLoop(frameDelta,newTime);
+        OnRender(frameDelta,newTime);
     }
 
     OnCleanup();
@@ -173,8 +171,8 @@ OnExecute(){
 
 // Main loop
 void 
-OnLoop(int dt){
-
+OnLoop(int dt, int time){
+    
     // Update the game if it's being played
     if (clientState.game->state == Game::GameState::Playing){
         clientState.keyboard->update(dt);
@@ -186,8 +184,10 @@ OnLoop(int dt){
     clientState.replayViewer->advance(dt);
 }
 
+static int selectedItem = 0;
+const int kItems = 4;
 void 
-OnRender(int dt){
+OnRender(int dt, int time){
     float fTime = (float)SDL_GetTicks()/1000.0f; 
 
     glClearColor(0,0,0,1);
@@ -198,18 +198,36 @@ OnRender(int dt){
 
     // Draw Gameplay
     Renderer::BeginBatch();
+    
     Renderer::TargetTransform(0);
-
     RenderGame::DrawGame({RenderGame::kGaps,64.0f},*clientState.game,*clientState.identity, activeAssets.pieceTexture);
-
-
     RenderGame::DrawGame({GameResolution.x - RenderGame::kGaps - RenderGame::kGameDimensions.x,64.0f},clientState.replayViewer->game,*clientState.identity, activeAssets.pieceTexture);
 
 
+    // Menu Test Code
+    // Texture* logo = textureCache.get("./Resources/Textures/logo.png");
+    // glm::vec2 logoPosition = glm::vec2{GameResolution.x / 2.0f, GameResolution.y / 2.5f} - logo->size / 2.0f;
+    // Renderer::DrawQuad(logoPosition + glm::vec2{4,4}, logo->size, logo->id, {0, 0, 0, 1});
+    // Renderer::DrawQuad(logoPosition, logo->size, logo->id, {1, 1, 1, 1});
+
+    // float intensity = sinf(time*2 / 1000.0f)*.25f + .5f;
+    // float stride = activeAssets.font->lineHeight*.5f;
+    // glm::vec2 cursor = GameResolution / 2.0f;
+    // Renderer::DrawStrBacked(cursor, 1.0f,"Online", activeAssets.font, (selectedItem == 0 ? glm::vec4{intensity,intensity,intensity,1} : glm::vec4{1,1,1,1}) );
+    // cursor.y+= stride;
+    // Renderer::DrawStrBacked(cursor, 1.0f,"Challenge", activeAssets.font,(selectedItem == 1 ? glm::vec4{intensity,intensity,intensity,1} : glm::vec4{1,1,1,1}));
+    // cursor.y+= stride;
+    // Renderer::DrawStrBacked(cursor, 1.0f,"Settings", activeAssets.font,(selectedItem == 2 ? glm::vec4{intensity,intensity,intensity,1} : glm::vec4{1,1,1,1}));
+    // cursor.y+= stride;
+    // Renderer::DrawStrBacked(cursor, 1.0f,"Quit", activeAssets.font,(selectedItem == 3 ? glm::vec4{intensity,intensity,intensity,1} : glm::vec4{1,1,1,1}));
+    
+
+
+    Renderer::TargetTransform(1);
     UI::Render();
 
     Renderer::EndBatch();
-    Renderer::Flush();
+    Renderer::Flush();  
 
     SDL_GL_SwapWindow(window);
 }
@@ -300,10 +318,23 @@ OnInput(const SDL_KeyboardEvent& key){
     // Function keys
     switch (key.keysym.scancode){
         case SDL_SCANCODE_LEFT:
-            clientState.replayViewer->rewind(500);
+            selectedItem = (selectedItem - 1);
+            if (selectedItem < 0){
+                selectedItem = 3;
+            }
         break;
         case SDL_SCANCODE_RIGHT:
-            clientState.replayViewer->advance(500);
+            selectedItem = (selectedItem + 1) % 4;
+        break;
+
+        case SDL_SCANCODE_UP:
+            selectedItem = (selectedItem - 1);
+            if (selectedItem < 0){
+                selectedItem = 3;
+            }
+        break;
+        case SDL_SCANCODE_DOWN:
+            selectedItem = (selectedItem + 1) % 4;
         break;
 
 
@@ -370,10 +401,10 @@ OnResize(int width, int height){
     glViewport(0,0,width,height);
 
     glm::vec2 scaleVec = Resolution / GameResolution ;
-    float scaleFactor = std::min(scaleVec.x,scaleVec.y);
+    scaleFactor = std::min(scaleVec.x,scaleVec.y);
 
     glm::vec2 effectiveSize = GameResolution  * scaleFactor; 
-    glm::vec2 offset = (Resolution /2.0f) - (effectiveSize/2.0f) ;
+    offset = (Resolution /2.0f) - (effectiveSize/2.0f) ;
 
     glm::mat4 viewTransform = glm::mat4(1.0f);
     viewTransform = glm::scale(viewTransform, glm::vec3{ scaleFactor,scaleFactor,0 });

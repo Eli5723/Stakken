@@ -6,8 +6,8 @@
 
 int OnExecute();
 bool OnInit();
-void OnLoop(int dt);
-void OnRender(int dt);
+void OnLoop(int dt, int time);
+void OnRender(int dt, int time);
 void OnCleanup();
 
 // Event Handling

@@ -13,6 +13,8 @@ struct ReplayViewer {
 
     ReplayViewer(Replay& replay , ReplayMapper& mapper, Game& game) : replay(replay), mapper(mapper), game(game) {
         time = 0;
+        game.Reset(replay.seed);
+        mapper.reset();
     }
 
     void reset(){

@@ -514,7 +514,7 @@ void Renderer::DrawStr(const glm::vec2& position,float scale, const std::string&
 	}
 }
 
-void Renderer::DrawStrC(const glm::vec2& position,float scale, const std::string &str, Font* font) {
+void Renderer::DrawStrC(const glm::vec2& position,float scale, const std::string &str, Font* font, const glm::vec4& color) {
 	scale *= .5f;
 
 	//If we run out of indices or textures slots, draw everything and reset the buffers
@@ -523,8 +523,6 @@ void Renderer::DrawStrC(const glm::vec2& position,float scale, const std::string
 		Flush();
 		BeginBatch();
 	}
-	
-	const glm::vec4 color = { 1.0f,1.0f,1.0f,1.0f };
 
 	//Find the first open texture slot and insert the texture
 	float textureIndex = 0.0f;

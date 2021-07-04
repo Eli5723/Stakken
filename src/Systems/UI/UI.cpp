@@ -10,7 +10,9 @@ namespace UI {
     struct Data {
         Element* screen;
 
+        // Clicked Element
         Element* focus = 0;
+
         Element* drag = 0;
         glm::vec2 dragStartingPosition;
 
@@ -52,7 +54,7 @@ namespace UI {
             if (current->clickCallback){
                 current->clickCallback(x,y);
                 return current;
-            } else if (current->moveCallback){
+            } else if (current->dragCallback){
                 // Used to hide the cursor while dragging so that the user can focus
                 SDL_SetRelativeMouseMode(SDL_TRUE);
                 s_Data.drag = current;
@@ -87,8 +89,8 @@ namespace UI {
             return;
         }
 
-        if (s_Data.drag && s_Data.drag->moveCallback)
-            s_Data.drag->moveCallback(event);
+        if (s_Data.drag && s_Data.drag->dragCallback)
+            s_Data.drag->dragCallback(event);
     }
 
     void SetIgnoreMovement() {
@@ -133,11 +135,7 @@ namespace UI {
             
             if (node->flags & Flags::piece)
                 RenderGame::DrawPiece(offset, node->data.piece.colorTable, activeAssets.pieceTexture, node->data.piece.type, node->data.piece.rotation);
-
-            
-            
-            
-            
+                
             Render(node,baseOffset + node->position);
             node = node->next;
         }

@@ -14,6 +14,8 @@ Texture::Texture(const char* path) {
 		printf(("Failed to load texture: %s\n"),path);
 	}
 
+	size = {width,height};
+
 	glGenTextures(1, &id);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, id);

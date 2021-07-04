@@ -153,7 +153,7 @@ Element* Options(InputProfile* profile, Identity* identity){
         h->data.texture = textureCache.get("./Resources/Textures/Icons/hue.png");
         h->position = position + glm::vec2{0,RenderGame::kPieceDimensions.y+1};
         h->size= {32.0f,32.0f};
-        h->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
+        h->dragCallback = [i,identity](const SDL_MouseMotionEvent& event){
             //Initializes a static float for each color table entry to the hue of that entry
             hue[i] = hue[i] + event.yrel*2;
             HSV2RGB(hue[i],saturation[i],value[i], identity->color_table.entries[i]);
@@ -167,7 +167,7 @@ Element* Options(InputProfile* profile, Identity* identity){
         s->data.texture = textureCache.get("./Resources/Textures/Icons/saturation.png");
         s->position = position + glm::vec2{32.0f,RenderGame::kPieceDimensions.y+1};
         s->size= {32.0f,32.0f};
-        s->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
+        s->dragCallback = [i,identity](const SDL_MouseMotionEvent& event){
             //Initializes a static float for each color table entry to the hue of that entry
             saturation[i] = fmax(0,fmin(1,saturation[i] - event.yrel*.025));
 
@@ -181,7 +181,7 @@ Element* Options(InputProfile* profile, Identity* identity){
         v->data.texture = textureCache.get("./Resources/Textures/Icons/value.png");
         v->position = position + glm::vec2{64.0f,RenderGame::kPieceDimensions.y+1};
         v->size= {32.0f,32.0f};
-        v->moveCallback = [i,identity](const SDL_MouseMotionEvent& event){
+        v->dragCallback = [i,identity](const SDL_MouseMotionEvent& event){
             //Initializes a static float for each color table entry to the hue of that entry
             value[i] = fmax(0,fmin(1,value[i] - event.yrel*.005));
 

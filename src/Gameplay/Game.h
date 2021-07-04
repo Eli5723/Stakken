@@ -27,7 +27,7 @@ struct Game {
 	int state;
 
 	// Ugly association
-	InputProfile* profile;
+	int* rotationTable;
 
 	Board* board;
 	
@@ -51,8 +51,12 @@ struct Game {
 	int gravityTime = 300;
 	int gravityTimer = gravityTime;
 
+	int creepTime = 2000;
+	int creepTimer = creepTime;
+
+
 	Game(InputProfile* profile, int seed) {
-		this->profile = profile;
+		this->rotationTable = profile->rotation;
 
 		// TODO: Start Inactive, unseeded?
 		state = GameState::Playing;
@@ -69,8 +73,8 @@ struct Game {
 		TileType firstPieceType = (TileType)(pieceRandomizer.next()%7);
 		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
 
-		heldPiece = new Piece( kInitialPieceX, kInitialPieceY, firstPieceType, profile->rotation[firstPieceType]);
-		nextPiece = new Piece( kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+		heldPiece = new Piece( 0,0,0,0);
+		nextPiece = new Piece( 0,0,0,0);
 
 		// Configuration
 		gravityTime = 300;
@@ -84,7 +88,7 @@ struct Game {
 		speed = 0;
 	}
 
-	void Reset( int seed){
+	void Reset(int seed){
 		pieceRandomizer.seed(seed);
 		holeRandomizer.seed(seed);
 		
@@ -92,6 +96,8 @@ struct Game {
 			recorder->Reset(seed);
 
 		time = 0;
+		gravityTimer = gravityTime;
+		creepTimer = creepTime;
 		clears = 0;
 		pieces = 0;
 		lastPlacement = 0;
@@ -100,8 +106,8 @@ struct Game {
 		TileType firstPieceType = (TileType)(pieceRandomizer.next()%7);
 		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
 
-		heldPiece->Convert(kInitialPieceX, kInitialPieceY, firstPieceType, profile->rotation[firstPieceType]);
-		nextPiece->Convert(kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+		heldPiece->Convert(kInitialPieceX, kInitialPieceY, firstPieceType, rotationTable[firstPieceType]);
+		nextPiece->Convert(kInitialPieceX, kInitialPieceY, nextPieceType, rotationTable[nextPieceType]);
 
 		// Stats
 		time = 0;
@@ -130,21 +136,38 @@ struct Game {
 
 		time += dt;
 
+		// Gravity
 		gravityTimer -= dt;
 		while (gravityTimer <= 0){
-			heldPiece->moveDown();
-			if (!board->checkFit(heldPiece)){
-				heldPiece->moveUp();
-				ApplyHeldPiece();
-			}
-
-			recorder->record(TetrisAction::Gravity);
-
+			gravity();
 			gravityTimer += gravityTime;
+			recorder->record(TetrisAction::Gravity);
 		}
+
+		// Survivor Garbage Creep
+		creepTimer -= dt;
+		while (creepTimer <= 0){
+			creep();
+			creepTimer += creepTime;
+			recorder->record(TetrisAction::AddRow);
+		} 
 
 		if (recorder)
 			recorder->saveFrame();
+	}
+
+	inline void gravity(){
+		heldPiece->moveDown();
+		if (!board->checkFit(heldPiece)){
+			heldPiece->moveUp();
+			ApplyHeldPiece();
+		}
+	}
+
+	inline void creep(){
+		if (heldPiece->y > 0)
+				heldPiece->moveUp();
+			board->addLine(holeRandomizer.next()%10);
 	}
 
 	void UpdateReplay(int dt){
@@ -213,8 +236,11 @@ struct Game {
 					heldPiece->rotateCW();
 					if (!board->offsetTest(heldPiece))
 						heldPiece->rotateCCW();
-				break;
-
+				break;heldPiece->moveDown();
+					if (!board->checkFit(heldPiece)){
+						heldPiece->moveUp();
+						ApplyHeldPiece();
+					}
 				case TetrisAction::RCCW:
 					heldPiece->rotateCCW();
 					if (!board->offsetTest(heldPiece))
@@ -223,13 +249,13 @@ struct Game {
 
 				// Game Events
 				case TetrisAction::Gravity:
-					heldPiece->moveDown();
-					if (!board->checkFit(heldPiece)){
-						heldPiece->moveUp();
-						ApplyHeldPiece();
-					}
+					gravity();
 				break;
 
+				case TetrisAction::AddRow:
+					creep();
+				break;
+				
 				case TetrisAction::None:
 				default:
 				SDL_LogWarn(0, "Game recieved malformed input!");
@@ -258,7 +284,7 @@ struct Game {
 		heldPiece = nextPiece;
 		TileType nextPieceType = (TileType)(pieceRandomizer.next()%7);
 
-		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, nextPieceType, profile->rotation[nextPieceType]);
+		nextPiece = temp->Convert(kInitialPieceX, kInitialPieceY, nextPieceType, rotationTable[nextPieceType]);
 
 		// Increment stats
 		pieces += 1;
